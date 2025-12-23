@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiX, FiCheckCircle, FiXCircle, FiDollarSign, FiList, FiSettings, FiShoppingBag, FiCalendar, FiEye } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiX, FiCheckCircle, FiXCircle, FiList, FiSettings, FiShoppingBag, FiCalendar, FiEye } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
 import './SubscriptionPlans.css';
@@ -240,10 +240,10 @@ const SubscriptionPlans = () => {
       }
       
       // Create new features
-      const planFeatures = planFormData.features || [];
-      for (let i = 0; i < planFeatures.length; i++) {
+      const featuresToCreate = planFormData.features || [];
+      for (let i = 0; i < featuresToCreate.length; i++) {
         await api.post(`/subscriptions/admin/plans/${planId}/features`, {
-          title: planFeatures[i],
+          title: featuresToCreate[i],
           isHighlighted: false,
           sortOrder: i
         });
