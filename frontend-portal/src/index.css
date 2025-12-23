@@ -1,0 +1,73 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
+/* RTL Support */
+html[dir="rtl"] {
+  direction: rtl;
+}
+
+html[dir="rtl"] body {
+  font-family: 'Inter', 'Cairo', 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  outline: none;
+}
+
+/* RTL adjustments */
+html[dir="rtl"] .header-container,
+html[dir="rtl"] .nav-tabs-container,
+html[dir="rtl"] .home-container,
+html[dir="rtl"] .footer-container {
+  direction: rtl;
+}
+
+html[dir="rtl"] .search-bar input {
+  text-align: right;
+}
+
+html[dir="rtl"] .search-icon {
+  right: 1rem;
+  left: auto;
+}
+
+html[dir="rtl"] .input-icon {
+  right: 1rem;
+  left: auto;
+}
+
+html[dir="rtl"] .input-with-icon input {
+  padding-right: 2.75rem;
+  padding-left: 1rem;
+}

@@ -1,0 +1,151 @@
+const User = require('../models/User');
+const Role = require('../models/Role');
+
+// Get all users
+exports.getAllUsers = async (req, res) => {
+  try {
+    const { role, isActive, search } = req.query;
+    const filter = {};
+
+    if (role) filter.role = role;
+    if (isActive !== undefined) filter.isActive = isActive === 'true';
+    if (search) {
+      filter.$or = [
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(filter)
+      .populate('role', 'name')
+      .populate('shop', 'name')
+      .populate('createdBy', 'email')
+      .populate('updatedBy', 'email')
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get user by ID
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate('role')
+      .populate('shop')
+      .populate('createdBy', 'email')
+      .populate('updatedBy', 'email')
+      .select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Create user
+exports.createUser = async (req, res) => {
+  try {
+    const userData = {
+      ...req.body,
+      createdBy: req.user._id
+    };
+
+    // Get the role to check if it's guest or shopAdmin
+    const Role = require('../models/Role');
+    const role = await Role.findById(userData.role);
+    
+    // For guest and shopAdmin roles, set isActive to false by default (requires SuperAdmin activation)
+    if (role && (role.name === 'guest' || role.name === 'shopAdmin')) {
+      userData.isActive = false;
+    }
+
+    const user = await User.create(userData);
+    await user.populate('role shop');
+
+    res.status(201).json({
+      ...user.toObject(),
+      password: undefined
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Update user
+exports.updateUser = async (req, res) => {
+  try {
+    const updateData = {
+      ...req.body,
+      updatedBy: req.user._id
+    };
+
+    // Don't allow password update through this route
+    delete updateData.password;
+
+    // Handle shop field: convert empty string to null to remove shop assignment
+    if (updateData.shop === '' || updateData.shop === null || updateData.shop === undefined) {
+      updateData.shop = null;
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    )
+      .populate('role shop')
+      .select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Activate/Deactivate user
+exports.toggleUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isActive = !user.isActive;
+    user.updatedBy = req.user._id;
+    await user.save();
+
+    await user.populate('role shop');
+    res.json({
+      ...user.toObject(),
+      password: undefined
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+

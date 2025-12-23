@@ -1,0 +1,17 @@
+.btn-lang {
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-lang:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+

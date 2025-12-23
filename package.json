@@ -1,0 +1,16 @@
+{
+  "name": "idream-portal",
+  "version": "1.0.0",
+  "description": "iDream Portal - E-commerce platform with shop management",
+  "main": "index.js",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:portal": "cd frontend-portal && npm start",
+    "dev:admin": "cd admin-portal && npm start",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend-portal && npm install && cd ../admin-portal && npm install"
+  },
+  "keywords": ["ecommerce", "portal", "shop-management"],
+  "author": "",
+  "license": "ISC"
+}
+
