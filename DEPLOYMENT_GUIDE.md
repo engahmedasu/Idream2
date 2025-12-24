@@ -474,7 +474,7 @@ server {
 
     # File upload size limit (for videos and images)
     client_max_body_size 100M;
-}
+}backe
 ```
 
 ### 7.2 Create Nginx Configuration for Frontend Portal

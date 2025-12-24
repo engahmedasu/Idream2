@@ -50,7 +50,8 @@ const VideoBanner = () => {
       
       if (videoId) {
         // Don't use loop parameter - we want sequential playback, not looping individual videos
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0`;
+        // Disable controls and browser actions
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&controls=0&modestbranding=1&disablekb=1&playsinline=1`;
       }
       return video.videoUrl;
     }
@@ -118,8 +119,8 @@ const VideoBanner = () => {
                 src={videoSource}
                 title={currentVideo.title}
                 frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
+                allowFullScreen={false}
                 className="video-iframe"
               />
             ) : (
@@ -132,6 +133,10 @@ const VideoBanner = () => {
                 className="video-element"
                 poster={thumbnailUrl || undefined}
                 key={currentIndex}
+                controls={false}
+                disablePictureInPicture
+                controlsList="nodownload nofullscreen noremoteplayback"
+                onContextMenu={(e) => e.preventDefault()}
               >
                 <source src={videoSource} type="video/mp4" />
                 Your browser does not support the video tag.
