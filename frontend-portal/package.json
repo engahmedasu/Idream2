@@ -41,7 +41,25 @@
   },
   "proxy": "http://localhost:5000",
   "devDependencies": {
-    "@craco/craco": "^7.1.0",
+    "@craco/craco": "5.9.0",
     "cross-env": "^10.1.0"
+  },
+  "overrides": {
+    "schema-utils": "^3.3.0",
+    "fork-ts-checker-webpack-plugin": {
+      "schema-utils": {
+        "ajv": "^6.12.6",
+        "ajv-keywords": "^3.5.2"
+      }
+    },
+    "babel-loader": {
+      "schema-utils": {
+        "ajv": "^6.12.6",
+        "ajv-keywords": "^3.5.2"
+      }
+    },
+    "ajv-formats": {
+      "ajv": "^8.17.1"
+    }
   }
 }

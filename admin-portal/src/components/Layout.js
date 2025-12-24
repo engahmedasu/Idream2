@@ -18,7 +18,8 @@ import {
   FiShoppingCart,
   FiList,
   FiChevronDown,
-  FiChevronRight
+  FiChevronRight,
+  FiVideo
 } from 'react-icons/fi';
 import './Layout.css';
 
@@ -58,10 +59,17 @@ const Layout = () => {
     },
     {
       type: 'item',
+      path: '/videos',
+      icon: FiVideo,
+      label: 'Videos',
+      roles: ['superAdmin']
+    },
+    {
+      type: 'item',
       path: '/shops',
       icon: FiShoppingBag,
       label: 'Shops',
-      roles: ['superAdmin', 'mallAdmin']
+      roles: ['superAdmin', 'mallAdmin', 'Sales']
     },
     {
       type: 'item',
@@ -81,12 +89,12 @@ const Layout = () => {
       type: 'group',
       label: 'Reports',
       icon: FiFileText,
-      roles: ['superAdmin', 'mallAdmin', 'shopAdmin'],
+      roles: ['superAdmin', 'mallAdmin', 'shopAdmin', 'Finance'],
       children: [
-        { path: '/reports/products', label: 'Products', icon: FiPackage, roles: ['superAdmin', 'mallAdmin', 'shopAdmin'] },
-        { path: '/reports/shares', label: 'Sharing', icon: FiShare2, roles: ['superAdmin', 'mallAdmin'] },
-        { path: '/reports/orders', label: 'Orders', icon: FiShoppingCart, roles: ['superAdmin', 'mallAdmin'] },
-        { path: '/reports/subscription-logs', label: 'Subscription Logs', icon: FiList, roles: ['superAdmin'] }
+        { path: '/reports/products', label: 'Products', icon: FiPackage, roles: ['superAdmin', 'mallAdmin', 'shopAdmin', 'Finance'] },
+        { path: '/reports/shares', label: 'Sharing', icon: FiShare2, roles: ['superAdmin', 'mallAdmin', 'Finance'] },
+        { path: '/reports/orders', label: 'Orders', icon: FiShoppingCart, roles: ['superAdmin', 'mallAdmin', 'Finance'] },
+        { path: '/reports/subscription-logs', label: 'Subscription Logs', icon: FiList, roles: ['superAdmin', 'Finance'] }
       ]
     }
   ];

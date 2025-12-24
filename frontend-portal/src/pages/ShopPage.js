@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { FiPhone, FiShare2, FiMessageCircle, FiMapPin } from 'react-icons/fi';
-import { FaFacebook, FaInstagram } from 'react-icons/fa';
+import { FiShare2, FiMapPin } from 'react-icons/fi';
+import { FaFacebook, FaInstagram, FaGlobe } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import ProductGrid from '../components/ProductGrid';
@@ -72,11 +72,6 @@ const ShopPage = () => {
     }
   };
 
-  const handlePhoneCall = () => {
-    if (shop.mobile) {
-      window.location.href = `tel:${shop.mobile}`;
-    }
-  };
 
   const handleLocationClick = () => {
     if (shop.address) {
@@ -152,17 +147,6 @@ const ShopPage = () => {
                   <FiMapPin />
                 </button>
               )}
-              {shop.whatsapp && (
-                <a
-                  href={`https://wa.me/${shop.whatsapp.replace(/\D/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="overlay-btn whatsapp-btn"
-                  aria-label="WhatsApp"
-                >
-                  <FiMessageCircle />
-                </a>
-              )}
               {shop.facebook && (
                 <a
                   href={shop.facebook}
@@ -185,10 +169,16 @@ const ShopPage = () => {
                   <FaInstagram />
                 </a>
               )}
-              {shop.mobile && (
-                <button className="overlay-btn phone-btn" onClick={handlePhoneCall} aria-label="Call">
-                  <FiPhone />
-                </button>
+              {shop.website && (
+                <a
+                  href={shop.website.startsWith('http') ? shop.website : `https://${shop.website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="overlay-btn website-btn"
+                  aria-label="Website"
+                >
+                  <FaGlobe />
+                </a>
               )}
             </div>
           </div>

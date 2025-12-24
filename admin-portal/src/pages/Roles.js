@@ -291,12 +291,9 @@ const Roles = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  placeholder="e.g., contentManager"
-                  disabled={editingRole && ['superAdmin', 'mallAdmin', 'shopAdmin', 'guest'].includes(editingRole.name)}
+                  placeholder="e.g., Sales, ContentManager, Moderator"
                 />
-                {editingRole && ['superAdmin', 'mallAdmin', 'shopAdmin', 'guest'].includes(editingRole.name) && (
-                  <small className="form-hint">System roles cannot be renamed</small>
-                )}
+                <small className="form-hint">Enter any role name. Use camelCase or PascalCase for consistency.</small>
               </div>
               <div className="form-group">
                 <label>Description</label>

@@ -214,7 +214,7 @@ exports.createProduct = async (req, res) => {
   try {
     const productData = {
       ...req.body,
-      image: req.file ? `/uploads/products/${req.file.filename}` : '',
+      image: req.file ? `/uploads/products/${req.file.filename}` : (req.body.image || ''),
       shop: req.body.shop || req.user.shop,
       createdBy: req.user._id
     };

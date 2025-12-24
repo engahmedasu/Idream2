@@ -108,7 +108,7 @@ const Products = () => {
         fetchLimitsStatus(shopId);
       }
     }
-  }, [showModal]);
+  }, [showModal, formData.shop, user]);
 
   const fetchLimitsStatus = async (shopId) => {
     try {

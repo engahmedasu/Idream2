@@ -10,9 +10,12 @@ exports.getAllShops = async (req, res) => {
     const { category, isActive, search } = req.query;
     const filter = {};
 
-    // If user is mallAdmin, restrict to shops they created
-    if (req.user && req.user.role?.name === 'mallAdmin') {
-      filter.createdBy = req.user._id;
+    // If user is mallAdmin or Sales role, restrict to shops they created
+    if (req.user && req.user.role) {
+      const roleName = req.user.role.name || req.user.role;
+      if (roleName === 'mallAdmin' || roleName === 'Sales') {
+        filter.createdBy = req.user._id;
+      }
     }
 
     if (category) filter.category = category;
@@ -50,10 +53,13 @@ exports.getShopById = async (req, res) => {
       return res.status(404).json({ message: 'Shop not found' });
     }
 
-    // If user is mallAdmin, ensure they can only access shops they created
-    if (req.user && req.user.role?.name === 'mallAdmin') {
-      if (shop.createdBy._id.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'Access denied. You can only access shops you created.' });
+    // If user is mallAdmin or Sales role, ensure they can only access shops they created
+    if (req.user && req.user.role) {
+      const roleName = req.user.role.name || req.user.role;
+      if (roleName === 'mallAdmin' || roleName === 'Sales') {
+        if (shop.createdBy._id.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ message: 'Access denied. You can only access shops you created.' });
+        }
       }
     }
 
@@ -130,14 +136,17 @@ exports.createShop = async (req, res) => {
 // Update shop
 exports.updateShop = async (req, res) => {
   try {
-    // If user is mallAdmin, ensure they can only update shops they created
-    if (req.user && req.user.role?.name === 'mallAdmin') {
-      const existingShop = await Shop.findById(req.params.id);
-      if (!existingShop) {
-        return res.status(404).json({ message: 'Shop not found' });
-      }
-      if (existingShop.createdBy.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'Access denied. You can only update shops you created.' });
+    // If user is mallAdmin or Sales role, ensure they can only update shops they created
+    if (req.user && req.user.role) {
+      const roleName = req.user.role.name || req.user.role;
+      if (roleName === 'mallAdmin' || roleName === 'Sales') {
+        const existingShop = await Shop.findById(req.params.id);
+        if (!existingShop) {
+          return res.status(404).json({ message: 'Shop not found' });
+        }
+        if (existingShop.createdBy.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ message: 'Access denied. You can only update shops you created.' });
+        }
       }
     }
 
@@ -186,14 +195,17 @@ exports.updateShop = async (req, res) => {
 // Delete shop
 exports.deleteShop = async (req, res) => {
   try {
-    // If user is mallAdmin, ensure they can only delete shops they created
-    if (req.user && req.user.role?.name === 'mallAdmin') {
-      const shop = await Shop.findById(req.params.id);
-      if (!shop) {
-        return res.status(404).json({ message: 'Shop not found' });
-      }
-      if (shop.createdBy.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'Access denied. You can only delete shops you created.' });
+    // If user is mallAdmin or Sales role, ensure they can only delete shops they created
+    if (req.user && req.user.role) {
+      const roleName = req.user.role.name || req.user.role;
+      if (roleName === 'mallAdmin' || roleName === 'Sales') {
+        const shop = await Shop.findById(req.params.id);
+        if (!shop) {
+          return res.status(404).json({ message: 'Shop not found' });
+        }
+        if (shop.createdBy.toString() !== req.user._id.toString()) {
+          return res.status(403).json({ message: 'Access denied. You can only delete shops you created.' });
+        }
       }
     }
 

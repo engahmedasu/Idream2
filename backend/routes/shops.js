@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const shopController = require('../controllers/shopController');
-const { auth, optionalAuth, authorize } = require('../middleware/auth');
+const { auth, optionalAuth, authorize, checkPermission } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 /**
@@ -158,7 +158,7 @@ router.get('/', optionalAuth, shopController.getAllShops);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', auth, upload.single('shopImage'), shopController.createShop);
+router.post('/', auth, checkPermission('shop', 'create'), upload.single('shopImage'), shopController.createShop);
 
 /**
  * @swagger
@@ -213,7 +213,7 @@ router.post('/', auth, upload.single('shopImage'), shopController.createShop);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/:id', auth, upload.single('shopImage'), shopController.updateShop);
+router.put('/:id', auth, checkPermission('shop', 'update'), upload.single('shopImage'), shopController.updateShop);
 
 /**
  * @swagger
@@ -266,7 +266,7 @@ router.put('/:id', auth, upload.single('shopImage'), shopController.updateShop);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.delete('/:id', auth, authorize('superAdmin', 'mallAdmin'), shopController.deleteShop);
+router.delete('/:id', auth, checkPermission('shop', 'delete'), shopController.deleteShop);
 
 /**
  * @swagger
@@ -315,7 +315,7 @@ router.delete('/:id', auth, authorize('superAdmin', 'mallAdmin'), shopController
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/:id/activate', auth, authorize('superAdmin', 'mallAdmin'), shopController.activateShop);
+router.patch('/:id/activate', auth, checkPermission('shop', 'activate'), shopController.activateShop);
 
 /**
  * @swagger
@@ -364,6 +364,7 @@ router.patch('/:id/activate', auth, authorize('superAdmin', 'mallAdmin'), shopCo
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.patch('/:id/deactivate', auth, authorize('superAdmin', 'mallAdmin'), shopController.deactivateShop);
+// Deactivate uses activate permission (same permission for both actions)
+router.patch('/:id/deactivate', auth, checkPermission('shop', 'activate'), shopController.deactivateShop);
 
 module.exports = router;

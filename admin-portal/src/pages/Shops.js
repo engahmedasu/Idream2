@@ -24,6 +24,7 @@ const Shops = () => {
     whatsapp: '',
     instagram: '',
     facebook: '',
+    website: '',
     address: '',
     category: '',
     priority: 0,
@@ -84,6 +85,7 @@ const Shops = () => {
         whatsapp: '',
         instagram: '',
         facebook: '',
+        website: '',
         address: '',
         category: '',
         priority: 0,
@@ -183,6 +185,7 @@ const Shops = () => {
       submitData.append('whatsapp', formData.whatsapp);
       submitData.append('instagram', formData.instagram || '');
       submitData.append('facebook', formData.facebook || '');
+      submitData.append('website', formData.website || '');
       submitData.append('address', formData.address);
       submitData.append('category', formData.category);
       submitData.append('priority', String(formData.priority || 0));
@@ -224,6 +227,7 @@ const Shops = () => {
       whatsapp: shop.whatsapp || '',
       instagram: shop.instagram || '',
       facebook: shop.facebook || '',
+      website: shop.website || '',
       address: shop.address || '',
       category: shop.category?._id || shop.category || '',
       priority: shop.priority || 0,
@@ -279,6 +283,7 @@ const Shops = () => {
       whatsapp: '',
       instagram: '',
       facebook: '',
+      website: '',
       address: '',
       category: '',
       priority: 0,
@@ -301,6 +306,7 @@ const Shops = () => {
 
   const isSuperAdmin = user?.role === 'superAdmin' || user?.role?.name === 'superAdmin';
   const isMallAdmin = user?.role === 'mallAdmin' || user?.role?.name === 'mallAdmin';
+  const isSales = user?.role === 'Sales' || user?.role?.name === 'Sales';
 
   // Count pending shops
   const pendingShopsCount = (shops || []).filter(shop => !shop.isApproved).length;
@@ -317,6 +323,11 @@ const Shops = () => {
           {(isSuperAdmin || isMallAdmin) && pendingShopsCount > 0 && (
             <p style={{ color: '#dc2626', marginTop: '0.5rem', fontSize: '0.875rem' }}>
               <strong>{pendingShopsCount}</strong> shop{pendingShopsCount !== 1 ? 's' : ''} pending verification
+            </p>
+          )}
+          {isSales && (
+            <p style={{ color: '#6b7280', marginTop: '0.5rem', fontSize: '0.875rem' }}>
+              Viewing shops created by you
             </p>
           )}
         </div>
@@ -480,6 +491,7 @@ const Shops = () => {
                       >
                         <FiEdit />
                       </button>
+                      {/* Activate/Deactivate buttons - only for superAdmin and mallAdmin */}
                       {(isSuperAdmin || isMallAdmin) && (
                         <>
                           {shop.isActive ? (
@@ -499,14 +511,17 @@ const Shops = () => {
                               <FiCheckCircle />
                             </button>
                           )}
-                          <button
-                            className="btn-icon danger"
-                            onClick={() => handleDelete(shop._id)}
-                            title="Delete"
-                          >
-                            <FiTrash2 />
-                          </button>
                         </>
+                      )}
+                      {/* Delete button - for superAdmin, mallAdmin, and Sales */}
+                      {(isSuperAdmin || isMallAdmin || isSales) && (
+                        <button
+                          className="btn-icon danger"
+                          onClick={() => handleDelete(shop._id)}
+                          title="Delete"
+                        >
+                          <FiTrash2 />
+                        </button>
                       )}
                     </div>
                   </td>
@@ -593,6 +608,17 @@ const Shops = () => {
                     placeholder="Facebook URL or username"
                   />
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>Website</label>
+                <input
+                  type="url"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleInputChange}
+                  placeholder="https://example.com"
+                />
               </div>
 
               <div className="form-group">

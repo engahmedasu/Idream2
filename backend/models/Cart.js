@@ -29,9 +29,11 @@ const cartSchema = new mongoose.Schema({
   }
 });
 
-cartSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
+// Use async/await style for pre-save hook to avoid next() callback issues
+cartSchema.pre('save', async function() {
+  if (this.isModified() || this.isNew) {
+    this.updatedAt = Date.now();
+  }
 });
 
 module.exports = mongoose.model('Cart', cartSchema);

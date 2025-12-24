@@ -1,5 +1,6 @@
 const Role = require('../models/Role');
 const Permission = require('../models/Permission');
+const User = require('../models/User');
 
 // Get all roles
 exports.getAllRoles = async (req, res) => {
@@ -78,11 +79,20 @@ exports.updateRole = async (req, res) => {
 // Delete role
 exports.deleteRole = async (req, res) => {
   try {
-    const role = await Role.findByIdAndDelete(req.params.id);
+    const role = await Role.findById(req.params.id);
     if (!role) {
       return res.status(404).json({ message: 'Role not found' });
     }
 
+    // Check if any users are using this role
+    const usersWithRole = await User.countDocuments({ role: role._id });
+    if (usersWithRole > 0) {
+      return res.status(400).json({ 
+        message: `Cannot delete role. ${usersWithRole} user(s) are currently assigned to this role. Please reassign users to another role first.` 
+      });
+    }
+
+    await Role.findByIdAndDelete(req.params.id);
     res.json({ message: 'Role deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const { auth, optionalAuth, authorize } = require('../middleware/auth');
+const { auth, optionalAuth, authorize, checkPermission } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 /**
@@ -176,7 +176,7 @@ router.get('/', optionalAuth, productController.getAllProducts);
  *       400:
  *         description: Bad request
  */
-router.post('/', auth, upload.single('productImage'), productController.createProduct);
+router.post('/', auth, checkPermission('product', 'create'), upload.single('productImage'), productController.createProduct);
 
 /**
  * @swagger
@@ -256,7 +256,7 @@ router.delete('/:id', auth, authorize('superAdmin', 'mallAdmin', 'shopAdmin'), p
  *       200:
  *         description: Product activated successfully
  */
-router.patch('/:id/activate', auth, authorize('superAdmin', 'mallAdmin'), productController.activateProduct);
+router.patch('/:id/activate', auth, checkPermission('product', 'activate'), productController.activateProduct);
 
 /**
  * @swagger
@@ -276,6 +276,7 @@ router.patch('/:id/activate', auth, authorize('superAdmin', 'mallAdmin'), produc
  *       200:
  *         description: Product deactivated successfully
  */
-router.patch('/:id/deactivate', auth, authorize('superAdmin', 'mallAdmin'), productController.deactivateProduct);
+// Deactivate uses activate permission (same permission for both actions)
+router.patch('/:id/deactivate', auth, checkPermission('product', 'activate'), productController.deactivateProduct);
 
 module.exports = router;

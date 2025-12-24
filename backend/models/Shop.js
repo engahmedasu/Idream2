@@ -29,6 +29,10 @@ const shopSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  website: {
+    type: String,
+    default: ''
+  },
   address: {
     type: String,
     default: ''
@@ -90,11 +94,10 @@ const shopSchema = new mongoose.Schema({
 });
 
 // Generate share link before save
-shopSchema.pre('save', function(next) {
+shopSchema.pre('save', async function() {
   if (!this.shareLink) {
     this.shareLink = `shop-${this._id}`;
   }
-  next();
 });
 
 // Index for sorting by priority

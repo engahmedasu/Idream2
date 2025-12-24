@@ -12,13 +12,18 @@
     "react-toastify": "^11.0.5"
   },
   "devDependencies": {
-    "@craco/craco": "^7.1.0",
+    "@craco/craco": "5.9.0",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
     "cross-env": "^10.1.0"
   },
   "scripts": {
     "start": "cross-env PORT=3001 craco start",
     "build": "craco build",
     "test": "craco test",
+    "test:watch": "craco test --watch",
+    "test:coverage": "craco test --coverage",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -38,5 +43,30 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000"
+  "proxy": "http://localhost:5000",
+  "jest": {
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    }
+  },
+  "overrides": {
+    "fork-ts-checker-webpack-plugin": {
+      "schema-utils": {
+        "ajv": "^6.12.6",
+        "ajv-keywords": "^3.5.2"
+      }
+    },
+    "babel-loader": {
+      "schema-utils": {
+        "ajv": "^6.12.6",
+        "ajv-keywords": "^3.5.2"
+      }
+    },
+    "schema-utils": {
+      "ajv": "^8.17.1"
+    },
+    "ajv-formats": {
+      "ajv": "^8.17.1"
+    }
+  }
 }

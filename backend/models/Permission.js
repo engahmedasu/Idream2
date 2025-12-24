@@ -13,7 +13,7 @@ const permissionSchema = new mongoose.Schema({
   resource: {
     type: String,
     required: true,
-    enum: ['user', 'role', 'permission', 'category', 'shop', 'product', 'cart', 'review', 'report']
+    enum: ['user', 'role', 'permission', 'category', 'shop', 'product', 'cart', 'review', 'report', 'video']
   },
   action: {
     type: String,

@@ -17,7 +17,16 @@
     "init-subscription-logs": "node scripts/initSubscriptionLogs.js",
     "add-product-limits": "node scripts/addProductLimitsMigration.js",
     "add-pricing-to-plans": "node scripts/addPricingToPlansMigration.js",
-    "test-email": "node scripts/testEmail.js"
+    "add-website-to-shops": "node scripts/addWebsiteToShopsMigration.js",
+    "init-videos": "node scripts/initVideosCollection.js",
+    "verify-roles": "node scripts/verifyRolesMigration.js",
+    "test-email": "node scripts/testEmail.js",
+    "test": "jest --verbose --coverage",
+    "test:watch": "jest --watch",
+    "test:auth": "jest --testPathPattern=auth",
+    "test:shops": "jest --testPathPattern=shops",
+    "test:products": "jest --testPathPattern=products",
+    "test:reports": "jest --testPathPattern=reports"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -34,9 +43,27 @@
     "react-i18next": "^16.5.0",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "xlsx": "^0.18.5"
+    "exceljs": "^4.4.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "jest": "^29.7.0",
+    "supertest": "^7.1.4",
+    "mongodb-memory-server": "^10.1.1",
+    "@types/jest": "^29.5.12"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/scripts/",
+      "/uploads/"
+    ],
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/__tests__/setup.js"
+    ]
   }
 }

@@ -161,7 +161,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                           </span>
                           {(item.product.shippingFees ?? 0) > 0 && (
                             <span className="cart-item-shipping-label">
-                              Fees: EGP {item.product.shippingFees.toFixed(2)}
+                              Shipping Fees: EGP {item.product.shippingFees.toFixed(2)}
                             </span>
                           )}
                         </div>

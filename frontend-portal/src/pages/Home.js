@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import ShopCard from '../components/ShopCard';
 import ProductCard from '../components/ProductCard';
+import VideoBanner from '../components/VideoBanner';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -215,6 +216,9 @@ const Home = () => {
   return (
     <div className="home">
       <div className="home-container">
+        {/* Video Banner Section */}
+        {!searchQuery && <VideoBanner />}
+
         {/* Welcome Section */}
         {!searchQuery && (
           <section className="welcome-banner">

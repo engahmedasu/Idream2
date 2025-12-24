@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 const ShareLog = require('../models/ShareLog');
 const OrderLog = require('../models/OrderLog');
 const SubscriptionLog = require('../models/SubscriptionLog');
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 
 // Generate shops report
 exports.generateShopsReport = async (req, res) => {
@@ -44,11 +44,41 @@ exports.generateShopsReport = async (req, res) => {
         'Updated At': shop.updatedAt
       }));
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Shops');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Shops');
 
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      // Handle empty data case
+      if (!data || data.length === 0) {
+        worksheet.addRow(['No data available']);
+        const buffer = await workbook.xlsx.writeBuffer();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=shops-report-${Date.now()}.xlsx`);
+        return res.send(buffer);
+      }
+
+      // Add headers
+      const headers = Object.keys(data[0] || {});
+      worksheet.addRow(headers);
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+
+      // Add data rows
+      data.forEach(row => {
+        worksheet.addRow(headers.map(header => row[header] || ''));
+      });
+
+      // Auto-size columns
+      worksheet.columns.forEach(column => {
+        column.width = 15;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=shops-report-${Date.now()}.xlsx`);
@@ -125,11 +155,41 @@ exports.generateProductsReport = async (req, res) => {
         'Updated At': product.updatedAt
       }));
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Products');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Products');
 
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      // Handle empty data case
+      if (!data || data.length === 0) {
+        worksheet.addRow(['No data available']);
+        const buffer = await workbook.xlsx.writeBuffer();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=products-report-${Date.now()}.xlsx`);
+        return res.send(buffer);
+      }
+
+      // Add headers
+      const headers = Object.keys(data[0] || {});
+      worksheet.addRow(headers);
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+
+      // Add data rows
+      data.forEach(row => {
+        worksheet.addRow(headers.map(header => row[header] || ''));
+      });
+
+      // Auto-size columns
+      worksheet.columns.forEach(column => {
+        column.width = 15;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=products-report-${Date.now()}.xlsx`);
@@ -174,11 +234,41 @@ exports.generateShareReport = async (req, res) => {
         'Shared At': log.createdAt
       }));
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Shares');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Shares');
 
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      // Handle empty data case
+      if (!data || data.length === 0) {
+        worksheet.addRow(['No data available']);
+        const buffer = await workbook.xlsx.writeBuffer();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=shares-report-${Date.now()}.xlsx`);
+        return res.send(buffer);
+      }
+
+      // Add headers
+      const headers = Object.keys(data[0] || {});
+      worksheet.addRow(headers);
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+
+      // Add data rows
+      data.forEach(row => {
+        worksheet.addRow(headers.map(header => row[header] || ''));
+      });
+
+      // Auto-size columns
+      worksheet.columns.forEach(column => {
+        column.width = 15;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=shares-report-${Date.now()}.xlsx`);
@@ -235,11 +325,41 @@ exports.generateOrderReport = async (req, res) => {
         });
       });
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Orders');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Orders');
 
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      // Handle empty data case
+      if (!data || data.length === 0) {
+        worksheet.addRow(['No data available']);
+        const buffer = await workbook.xlsx.writeBuffer();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=orders-report-${Date.now()}.xlsx`);
+        return res.send(buffer);
+      }
+
+      // Add headers
+      const headers = Object.keys(data[0] || {});
+      worksheet.addRow(headers);
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+
+      // Add data rows
+      data.forEach(row => {
+        worksheet.addRow(headers.map(header => row[header] || ''));
+      });
+
+      // Auto-size columns
+      worksheet.columns.forEach(column => {
+        column.width = 15;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=orders-report-${Date.now()}.xlsx`);
@@ -307,11 +427,41 @@ exports.generateSubscriptionLogsReport = async (req, res) => {
         'Notes': log.notes || ''
       }));
 
-      const worksheet = XLSX.utils.json_to_sheet(data);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Subscription Logs');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Subscription Logs');
 
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      // Handle empty data case
+      if (!data || data.length === 0) {
+        worksheet.addRow(['No data available']);
+        const buffer = await workbook.xlsx.writeBuffer();
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename=subscription-logs-report-${Date.now()}.xlsx`);
+        return res.send(buffer);
+      }
+
+      // Add headers
+      const headers = Object.keys(data[0] || {});
+      worksheet.addRow(headers);
+
+      // Style header row
+      worksheet.getRow(1).font = { bold: true };
+      worksheet.getRow(1).fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' }
+      };
+
+      // Add data rows
+      data.forEach(row => {
+        worksheet.addRow(headers.map(header => row[header] || ''));
+      });
+
+      // Auto-size columns
+      worksheet.columns.forEach(column => {
+        column.width = 15;
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
 
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=subscription-logs-report-${Date.now()}.xlsx`);

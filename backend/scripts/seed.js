@@ -65,6 +65,13 @@ const seedPermissions = async () => {
     
     // Report permissions
     { name: 'report.read', description: 'Generate reports', resource: 'report', action: 'read' },
+    
+    // Video permissions
+    { name: 'video.create', description: 'Create videos', resource: 'video', action: 'create' },
+    { name: 'video.read', description: 'Read videos', resource: 'video', action: 'read' },
+    { name: 'video.update', description: 'Update videos', resource: 'video', action: 'update' },
+    { name: 'video.delete', description: 'Delete videos', resource: 'video', action: 'delete' },
+    { name: 'video.activate', description: 'Activate/deactivate videos', resource: 'video', action: 'activate' },
   ];
 
   for (const perm of permissions) {

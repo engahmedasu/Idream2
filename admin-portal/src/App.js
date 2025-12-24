@@ -9,6 +9,7 @@ import Users from './pages/Users';
 import Shops from './pages/Shops';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
+import Videos from './pages/Videos';
 import Roles from './pages/Roles';
 import Permissions from './pages/Permissions';
 import Reports from './pages/Reports';
@@ -95,6 +96,14 @@ function AppRoutes() {
           } 
         />
         <Route 
+          path="videos" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <Videos />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
           path="roles" 
           element={
             <RoleProtectedRoute allowedRoles={['superAdmin']}>
@@ -124,7 +133,7 @@ function AppRoutes() {
         <Route 
           path="reports/subscription-logs" 
           element={
-            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+            <RoleProtectedRoute allowedRoles={['superAdmin', 'Finance']}>
               <Reports reportType="subscription-logs" />
             </RoleProtectedRoute>
           } 
