@@ -8,13 +8,15 @@ Each application (backend, frontend-portal, admin-portal) has separate environme
 
 - **`.env.dev`** - Development environment configuration
 - **`.env.prod`** - Production environment configuration
-- **`.env`** - Default/fallback environment file (optional)
+- **`.env`** - Default/fallback environment file (optional, not recommended)
 
 ### Template Files
 
 Template files are provided as examples:
-- `env.dev.example` - Template for development
-- `env.prod.example` - Template for production
+- `.env.dev.example` - Template for development (copy to `.env.dev`)
+- `.env.prod.example` - Template for production (copy to `.env.prod`)
+
+> **Note**: The old generic `.env.example` files have been removed. The dual-build system uses separate dev/prod example files for better environment separation.
 
 ## 🚀 Quick Setup
 
@@ -25,18 +27,18 @@ Copy the example files to create your actual environment files:
 ```bash
 # Backend
 cd backend
-cp env.dev.example .env.dev
-cp env.prod.example .env.prod
+cp .env.dev.example .env.dev
+cp .env.prod.example .env.prod
 
 # Frontend Portal
 cd ../frontend-portal
-cp env.dev.example .env.dev
-cp env.prod.example .env.prod
+cp .env.dev.example .env.dev
+cp .env.prod.example .env.prod
 
 # Admin Portal
 cd ../admin-portal
-cp env.dev.example .env.dev
-cp env.prod.example .env.prod
+cp .env.dev.example .env.dev
+cp .env.prod.example .env.prod
 ```
 
 ### Step 2: Configure Each File
@@ -150,7 +152,8 @@ npm run build
 
 1. **Never Commit Environment Files**
    - `.env.dev` and `.env.prod` are in `.gitignore`
-   - Only commit `env.dev.example` and `env.prod.example` templates
+   - Only commit `.env.dev.example` and `.env.prod.example` templates
+   - **Note**: The old `.env.example` files have been removed - use the dev/prod example files instead
 
 2. **Use Strong Secrets in Production**
    - Generate secure `JWT_SECRET`: 
@@ -213,7 +216,7 @@ If you're currently using a single `.env` file:
 
 2. Create `.env.prod` with production values:
    ```bash
-   cp env.prod.example .env.prod
+   cp .env.prod.example .env.prod
    # Edit .env.prod with production values
    ```
 

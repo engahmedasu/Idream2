@@ -1,3 +1,6 @@
+const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 module.exports = {
   webpack: {
     configure: (webpackConfig) => {
@@ -25,8 +28,42 @@ module.exports = {
         });
       }
 
+      // Production optimizations
+      if (isProduction) {
+        // Enable production mode optimizations
+        webpackConfig.mode = 'production';
+        
+        // Optimize bundle size
+        webpackConfig.optimization = {
+          ...webpackConfig.optimization,
+          minimize: true,
+          splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+              vendor: {
+                test: /[\\/]node_modules[\\/]/,
+                name: 'vendors',
+                chunks: 'all',
+              },
+            },
+          },
+        };
+
+        // Remove source maps in production (optional - set to false if you want source maps)
+        webpackConfig.devtool = false;
+      } else if (isDevelopment) {
+        // Development optimizations
+        webpackConfig.mode = 'development';
+        webpackConfig.devtool = 'eval-source-map';
+      }
+
       return webpackConfig;
     },
+  },
+  babel: {
+    plugins: [
+      // Add any babel plugins here if needed
+    ],
   },
 };
 

@@ -10,12 +10,12 @@ This guide explains how to configure environment variables for the iDream platfo
 
 ### Template Files
 
-- `backend/env.dev.example` - Backend development environment template
-- `backend/env.prod.example` - Backend production environment template
-- `frontend-portal/env.dev.example` - Frontend portal development environment template
-- `frontend-portal/env.prod.example` - Frontend portal production environment template
-- `admin-portal/env.dev.example` - Admin portal development environment template
-- `admin-portal/env.prod.example` - Admin portal production environment template
+- `backend/.env.dev.example` - Backend development environment template
+- `backend/.env.prod.example` - Backend production environment template
+- `frontend-portal/.env.dev.example` - Frontend portal development environment template
+- `frontend-portal/.env.prod.example` - Frontend portal production environment template
+- `admin-portal/.env.dev.example` - Admin portal development environment template
+- `admin-portal/.env.prod.example` - Admin portal production environment template
 
 ### Recommended Setup
 
@@ -34,18 +34,18 @@ See [ENV_FILES_GUIDE.md](./ENV_FILES_GUIDE.md) for setup instructions.
 ```bash
 # Backend
 cd backend
-cp env.dev.example .env.dev
-cp env.prod.example .env.prod
+cp .env.dev.example .env.dev
+cp .env.prod.example .env.prod
 
 # Frontend Portal
 cd ../frontend-portal
-cp env.dev.example .env.dev
-cp env.prod.example .env.prod
+cp .env.dev.example .env.dev
+cp .env.prod.example .env.prod
 
 # Admin Portal
 cd ../admin-portal
-cp env.dev.example .env.dev
-cp env.prod.example .env.prod
+cp .env.dev.example .env.dev
+cp .env.prod.example .env.prod
 ```
 
 #### Option B: Using Single .env File (Not Recommended)
@@ -55,15 +55,15 @@ If you prefer a single environment file, you can copy either dev or prod example
 ```bash
 # Backend - for development
 cd backend
-cp env.dev.example .env
+cp .env.dev.example .env
 
 # Frontend Portal - for development
 cd ../frontend-portal
-cp env.dev.example .env
+cp .env.dev.example .env
 
 # Admin Portal - for development
 cd ../admin-portal
-cp env.dev.example .env
+cp .env.dev.example .env
 ```
 
 > **Note:** Using separate `.env.dev` and `.env.prod` files is strongly recommended for better environment management.
@@ -159,7 +159,7 @@ Edit each `.env.dev` and `.env.prod` file (or `.env` if using legacy approach) w
 
 ### 1. Never Commit .env Files
 - Add `.env` to `.gitignore` (should already be there)
-- Only commit `.env.example` files
+- Only commit `.env.dev.example` and `.env.prod.example` files
 - Use environment variables in CI/CD systems
 
 ### 2. Use Strong Secrets
@@ -185,7 +185,7 @@ Edit each `.env.dev` and `.env.prod` file (or `.env` if using legacy approach) w
 
 ## 📋 Production Checklist
 
-- [ ] Copy `env.dev.example` to `.env.dev` and `env.prod.example` to `.env.prod` in all three directories
+- [ ] Copy `.env.dev.example` to `.env.dev` and `.env.prod.example` to `.env.prod` in all three directories
 - [ ] Set `NODE_ENV=production` in backend
 - [ ] Configure production MongoDB URI (MongoDB Atlas recommended)
 - [ ] Generate and set strong `JWT_SECRET`

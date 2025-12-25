@@ -40,7 +40,7 @@ This document lists all deployment-related files created for the iDream platform
 
 ## 🔧 Configuration Files
 
-### 4. backend/env.dev.example & backend/env.prod.example
+### 4. backend/.env.dev.example & backend/.env.prod.example
 **Purpose**: Backend environment variables templates for development and production  
 **Variables**:
 - NODE_ENV
@@ -50,13 +50,13 @@ This document lists all deployment-related files created for the iDream platform
 - JWT_EXPIRE
 - EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS
 
-### 5. frontend-portal/env.dev.example & frontend-portal/env.prod.example
+### 5. frontend-portal/.env.dev.example & frontend-portal/.env.prod.example
 **Purpose**: Frontend portal environment variables templates for development and production  
 **Variables**:
 - REACT_APP_API_URL
 - REACT_APP_ADMIN_PORTAL_URL
 
-### 6. admin-portal/env.dev.example & admin-portal/env.prod.example
+### 6. admin-portal/.env.dev.example & admin-portal/.env.prod.example
 **Purpose**: Admin portal environment variables templates for development and production  
 **Variables**:
 - REACT_APP_API_URL

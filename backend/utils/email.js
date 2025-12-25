@@ -1,19 +1,20 @@
 const nodemailer = require('nodemailer');
+const config = require('../config/app');
 
 // Validate email configuration
-if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+if (!config.email.user || !config.email.password) {
   console.warn('⚠️  EMAIL_USER and/or EMAIL_PASS not set in environment variables.');
   console.warn('   Email functionality will not work until configured.');
-  console.warn('   See backend/env.dev.example or backend/env.prod.example for setup instructions.');
+  console.warn('   See backend/.env.dev.example or backend/.env.prod.example for setup instructions.');
 }
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 587,
-  secure: false, // true for 465, false for other ports
+  host: config.email.host,
+  port: config.email.port,
+  secure: config.email.secure,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: config.email.user,
+    pass: config.email.password
   },
   tls: {
     rejectUnauthorized: false

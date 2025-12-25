@@ -53,17 +53,17 @@ rm -rf temp
 ```bash
 # Backend
 cd /var/www/idream/backend
-cp env.prod.example .env.prod
+cp .env.prod.example .env.prod
 nano .env  # Edit with your values
 
 # Frontend Portal
 cd /var/www/idream/frontend-portal
-cp env.prod.example .env.prod
+cp .env.prod.example .env.prod
 nano .env  # Set REACT_APP_API_URL and REACT_APP_ADMIN_PORTAL_URL
 
 # Admin Portal
 cd /var/www/idream/admin-portal
-cp env.prod.example .env.prod
+cp .env.prod.example .env.prod
 nano .env  # Set REACT_APP_API_URL
 ```
 

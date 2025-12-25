@@ -20,12 +20,12 @@
     "env-cmd": "^10.1.0"
   },
   "scripts": {
-    "start": "cross-env PORT=3001 craco start",
-    "start:dev": "cross-env PORT=3001 env-cmd -f .env.dev craco start",
-    "start:prod": "cross-env PORT=3001 env-cmd -f .env.prod craco start",
-    "build": "craco build",
-    "build:dev": "env-cmd -f .env.dev craco build",
-    "build:prod": "env-cmd -f .env.prod craco build",
+    "start": "cross-env NODE_ENV=development PORT=3001 craco start",
+    "start:dev": "cross-env NODE_ENV=development PORT=3001 env-cmd -f .env.dev craco start",
+    "start:prod": "cross-env NODE_ENV=production PORT=3001 env-cmd -f .env.prod craco start",
+    "build": "cross-env NODE_ENV=production PORT=3001 craco build",
+    "build:dev": "cross-env NODE_ENV=development env-cmd -f .env.dev craco build",
+    "build:prod": "cross-env NODE_ENV=production env-cmd -f .env.prod craco build",
     "test": "craco test",
     "test:watch": "craco test --watch",
     "test:coverage": "craco test --coverage",

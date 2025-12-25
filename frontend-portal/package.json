@@ -17,12 +17,12 @@
     "swagger-ui-express": "^5.0.1"
   },
   "scripts": {
-    "start": "craco start",
-    "start:dev": "env-cmd -f .env.dev craco start",
-    "start:prod": "env-cmd -f .env.prod craco start",
-    "build": "craco build",
-    "build:dev": "env-cmd -f .env.dev craco build",
-    "build:prod": "env-cmd -f .env.prod craco build",
+    "start": "cross-env NODE_ENV=development craco start",
+    "start:dev": "cross-env NODE_ENV=development env-cmd -f .env.dev craco start",
+    "start:prod": "cross-env NODE_ENV=production env-cmd -f .env.prod craco start",
+    "build": "cross-env NODE_ENV=production craco build",
+    "build:dev": "cross-env NODE_ENV=development env-cmd -f .env.dev craco build",
+    "build:prod": "cross-env NODE_ENV=production env-cmd -f .env.prod craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
