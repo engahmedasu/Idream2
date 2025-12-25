@@ -16,11 +16,16 @@
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "env-cmd": "^10.1.0"
   },
   "scripts": {
     "start": "cross-env PORT=3001 craco start",
+    "start:dev": "cross-env PORT=3001 env-cmd -f .env.dev craco start",
+    "start:prod": "cross-env PORT=3001 env-cmd -f .env.prod craco start",
     "build": "craco build",
+    "build:dev": "env-cmd -f .env.dev craco build",
+    "build:prod": "env-cmd -f .env.prod craco build",
     "test": "craco test",
     "test:watch": "craco test --watch",
     "test:coverage": "craco test --coverage",

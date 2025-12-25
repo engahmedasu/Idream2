@@ -18,7 +18,11 @@
   },
   "scripts": {
     "start": "craco start",
+    "start:dev": "env-cmd -f .env.dev craco start",
+    "start:prod": "env-cmd -f .env.prod craco start",
     "build": "craco build",
+    "build:dev": "env-cmd -f .env.dev craco build",
+    "build:prod": "env-cmd -f .env.prod craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
   },
@@ -42,7 +46,8 @@
   "proxy": "http://localhost:5000",
   "devDependencies": {
     "@craco/craco": "5.9.0",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "env-cmd": "^10.1.0"
   },
   "overrides": {
     "schema-utils": "^3.3.0",

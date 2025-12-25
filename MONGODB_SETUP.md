@@ -91,10 +91,10 @@ MONGODB_URI=mongodb://localhost:27017/idream
 
 ## After Setup:
 
-1. **Create .env file**:
+1. **Create .env.dev file**:
    ```powershell
    cd backend
-   copy .env.example .env
+   copy env.dev.example .env.dev
    ```
 
 2. **Edit .env file** and update `MONGODB_URI` with your connection string

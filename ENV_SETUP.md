@@ -1,36 +1,78 @@
 # Environment Variables Setup Guide
 
-This guide explains how to configure environment variables for the iDream platform in production.
+This guide explains how to configure environment variables for the iDream platform.
+
+> **📚 New: Environment Files Guide**  
+> We now support separate `.env.dev` and `.env.prod` files for development and production environments.  
+> See **[ENV_FILES_GUIDE.md](./ENV_FILES_GUIDE.md)** for detailed instructions on using environment-specific files.
 
 ## 📁 Files Overview
 
-- `backend/.env.example` - Backend API environment variables template
-- `frontend-portal/.env.example` - Frontend portal environment variables template
-- `admin-portal/.env.example` - Admin portal environment variables template
+### Template Files
+
+- `backend/env.dev.example` - Backend development environment template
+- `backend/env.prod.example` - Backend production environment template
+- `frontend-portal/env.dev.example` - Frontend portal development environment template
+- `frontend-portal/env.prod.example` - Frontend portal production environment template
+- `admin-portal/env.dev.example` - Admin portal development environment template
+- `admin-portal/env.prod.example` - Admin portal production environment template
+
+### Recommended Setup
+
+For better environment management, use separate files:
+- **`.env.dev`** - Development environment configuration
+- **`.env.prod`** - Production environment configuration
+
+See [ENV_FILES_GUIDE.md](./ENV_FILES_GUIDE.md) for setup instructions.
 
 ## 🚀 Quick Setup
 
 ### Step 1: Create .env files
 
-Copy the example files to create your .env files:
+#### Option A: Using Separate Dev/Prod Files (Recommended)
 
 ```bash
 # Backend
 cd backend
-cp .env.example .env
+cp env.dev.example .env.dev
+cp env.prod.example .env.prod
 
 # Frontend Portal
 cd ../frontend-portal
-cp .env.example .env
+cp env.dev.example .env.dev
+cp env.prod.example .env.prod
 
 # Admin Portal
 cd ../admin-portal
-cp .env.example .env
+cp env.dev.example .env.dev
+cp env.prod.example .env.prod
 ```
+
+#### Option B: Using Single .env File (Not Recommended)
+
+If you prefer a single environment file, you can copy either dev or prod example:
+
+```bash
+# Backend - for development
+cd backend
+cp env.dev.example .env
+
+# Frontend Portal - for development
+cd ../frontend-portal
+cp env.dev.example .env
+
+# Admin Portal - for development
+cd ../admin-portal
+cp env.dev.example .env
+```
+
+> **Note:** Using separate `.env.dev` and `.env.prod` files is strongly recommended for better environment management.
 
 ### Step 2: Configure each .env file
 
-Edit each `.env` file with your production values (see details below).
+Edit each `.env.dev` and `.env.prod` file (or `.env` if using legacy approach) with your environment-specific values (see details below).
+
+> **Note:** For detailed instructions on using environment-specific files, see [ENV_FILES_GUIDE.md](./ENV_FILES_GUIDE.md).
 
 ## 🔧 Configuration Details
 
@@ -143,7 +185,7 @@ Edit each `.env` file with your production values (see details below).
 
 ## 📋 Production Checklist
 
-- [ ] Copy `.env.example` to `.env` in all three directories
+- [ ] Copy `env.dev.example` to `.env.dev` and `env.prod.example` to `.env.prod` in all three directories
 - [ ] Set `NODE_ENV=production` in backend
 - [ ] Configure production MongoDB URI (MongoDB Atlas recommended)
 - [ ] Generate and set strong `JWT_SECRET`

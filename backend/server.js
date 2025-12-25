@@ -17,7 +17,28 @@ process.on('warning', (warning) => {
   console.warn(warning.name, warning.message);
 });
 
-dotenv.config();
+// Load environment variables based on ENV_FILE or NODE_ENV
+// Supports: .env.dev, .env.prod, or default .env
+const fs = require('fs');
+const envFile = process.env.ENV_FILE || 
+  (process.env.NODE_ENV === 'production' ? '.env.prod' : 
+   process.env.NODE_ENV === 'development' ? '.env.dev' : '.env');
+
+const envPath = path.join(__dirname, envFile);
+
+// Check if the specified env file exists, otherwise fallback to .env
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+  console.log(`📝 Loading environment from: ${envFile}`);
+} else {
+  // Fallback to default .env if specified file doesn't exist
+  dotenv.config();
+  if (envFile !== '.env') {
+    console.log(`⚠️  ${envFile} not found, using default .env`);
+  } else {
+    console.log(`📝 Loading environment from: .env`);
+  }
+}
 
 const app = express();
 

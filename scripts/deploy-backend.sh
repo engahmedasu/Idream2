@@ -24,9 +24,9 @@ echo "Step 1: Installing dependencies..."
 npm install --production
 
 echo "Step 2: Checking environment file..."
-if [ ! -f .env ]; then
-    echo "Warning: .env file not found. Please create it from .env.example"
-    echo "Run: cp .env.example .env && nano .env"
+if [ ! -f .env.prod ]; then
+    echo "Warning: .env.prod file not found. Please create it from env.prod.example"
+    echo "Run: cp env.prod.example .env.prod && nano .env.prod"
     exit 1
 fi
 

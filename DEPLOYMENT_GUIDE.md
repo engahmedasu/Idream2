@@ -244,7 +244,7 @@ npm install --production
 
 ```bash
 # Copy environment template
-cp .env.example .env
+cp env.prod.example .env.prod
 
 # Edit environment file
 nano .env
@@ -344,7 +344,7 @@ rm -rf temp-repo
 cd /var/www/idream/frontend-portal
 
 # Copy environment template
-cp .env.example .env
+cp env.prod.example .env.prod
 
 # Edit environment file
 nano .env
@@ -401,7 +401,7 @@ rm -rf temp-repo
 cd /var/www/idream/admin-portal
 
 # Copy environment template
-cp .env.example .env
+cp env.prod.example .env.prod
 
 # Edit environment file
 nano .env

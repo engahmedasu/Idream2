@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.warn('⚠️  EMAIL_USER and/or EMAIL_PASS not set in environment variables.');
   console.warn('   Email functionality will not work until configured.');
-  console.warn('   See backend/.env.example or check README for setup instructions.');
+  console.warn('   See backend/env.dev.example or backend/env.prod.example for setup instructions.');
 }
 
 const transporter = nodemailer.createTransport({

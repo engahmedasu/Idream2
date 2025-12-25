@@ -23,13 +23,13 @@ echo "Step 1: Installing dependencies..."
 npm install
 
 echo "Step 2: Checking environment file..."
-if [ ! -f .env ]; then
-    echo "Warning: .env file not found. Creating from .env.example..."
-    if [ -f .env.example ]; then
-        cp .env.example .env
-        echo "Please edit .env file with your production values"
+if [ ! -f .env.prod ]; then
+    echo "Warning: .env.prod file not found. Creating from env.prod.example..."
+    if [ -f env.prod.example ]; then
+        cp env.prod.example .env.prod
+        echo "Please edit .env.prod file with your production values"
     else
-        echo "Error: .env.example not found"
+        echo "Error: env.prod.example not found"
         exit 1
     fi
 fi
