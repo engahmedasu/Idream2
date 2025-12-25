@@ -214,7 +214,7 @@ const CategoryPage = () => {
         {/* Category Header Section */}
         <section className="welcome-banner">
           <h1 className="welcome-title">
-            {category.name}
+            {t('home.welcomeTitle')} <span className="highlight">{category.name}</span>
           </h1>
           {category.description && (
             <p className="welcome-tagline">{category.description}</p>

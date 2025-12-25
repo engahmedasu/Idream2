@@ -19,6 +19,7 @@ const Home = () => {
   const [shops, setShops] = useState([]);
   const [hotOffers, setHotOffers] = useState([]);
   const [products, setProducts] = useState([]);
+  const [firstCategory, setFirstCategory] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -31,15 +32,20 @@ const Home = () => {
       // Build API URLs with search query if present
       const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : '';
       
-      const [shopsRes, hotOffersRes, productsRes] = await Promise.all([
+      const [shopsRes, hotOffersRes, productsRes, categoriesRes] = await Promise.all([
         api.get(`/shops?isActive=true${searchParam}`),
         searchQuery ? Promise.resolve({ data: [] }) : api.get('/products/hot-offers?limit=20').catch(() => ({ data: [] })), // Only show hot offers when not searching
-        api.get(`/products?isActive=true&sortBy=priority${searchParam}`).catch(() => ({ data: [] }))
+        api.get(`/products?isActive=true&sortBy=priority${searchParam}`).catch(() => ({ data: [] })),
+        searchQuery ? Promise.resolve({ data: [] }) : api.get('/categories?isActive=true').catch(() => ({ data: [] })) // Fetch categories for welcome banner
       ]);
 
       setShops(shopsRes.data);
       setHotOffers(hotOffersRes.data);
       setProducts(productsRes.data || []);
+      // Get the first category (sorted by order on backend)
+      if (categoriesRes.data && categoriesRes.data.length > 0) {
+        setFirstCategory(categoriesRes.data[0]);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -220,12 +226,14 @@ const Home = () => {
         {!searchQuery && <VideoBanner />}
 
         {/* Welcome Section */}
-        {!searchQuery && (
+        {!searchQuery && firstCategory && (
           <section className="welcome-banner">
             <h1 className="welcome-title">
-              {t('home.welcomeTitle')} <span className="highlight">{t('home.shoppingMall')}</span>
+              {t('home.welcomeTitle')} <span className="highlight">{firstCategory.name}</span>
             </h1>
-            <p className="welcome-tagline">{t('home.tagline')}</p>
+            {firstCategory.description && (
+              <p className="welcome-tagline">{firstCategory.description}</p>
+            )}
           </section>
         )}
 
