@@ -20,16 +20,25 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchCart();
+    } else {
+      // Clear cart when user logs out
+      setCart(null);
+      setLoading(false);
     }
   }, [user]);
 
   const fetchCart = async () => {
+    if (!user) {
+      setCart(null);
+      return;
+    }
     try {
       setLoading(true);
       const response = await api.get('/cart');
       setCart(response.data);
     } catch (error) {
       console.error('Error fetching cart:', error);
+      setCart(null);
     } finally {
       setLoading(false);
     }
@@ -67,9 +76,18 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     try {
-      await api.delete('/cart/clear');
-      setCart({ items: [] });
+      if (user) {
+        await api.delete('/cart/clear');
+      }
+      setCart(null);
     } catch (error) {
+      // Even if API call fails, clear the local cart state
+      setCart(null);
+      // Don't throw error if user is already logged out (401/403)
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // User is already logged out, just clear local state
+        return;
+      }
       throw error;
     }
   };

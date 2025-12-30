@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { FiUser, FiMail, FiPhone, FiLogOut } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import './Account.css';
 
 const Account = () => {
   const { t } = useTranslation();
   const { user, loading, logout } = useAuth();
+  const { clearCart } = useCart();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,7 +22,14 @@ const Account = () => {
     return null;
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Clear cart before logging out (while user still exists)
+      await clearCart();
+    } catch (error) {
+      // Ignore errors during cart clear, still proceed with logout
+      console.error('Error clearing cart during logout:', error);
+    }
     logout();
     navigate('/');
   };

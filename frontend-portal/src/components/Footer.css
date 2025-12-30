@@ -81,15 +81,23 @@
   gap: 1.5rem;
 }
 
-.footer-links a {
+.footer-links a,
+.footer-links .footer-link {
   color: #6b7280;
   font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.2s;
+  cursor: pointer;
 }
 
-.footer-links a:hover {
+.footer-links a:hover,
+.footer-links .footer-link:hover {
   color: #1f2937;
+}
+
+.footer-links a:visited,
+.footer-links .footer-link:visited {
+  color: #6b7280;
 }
 
 @media (max-width: 768px) {

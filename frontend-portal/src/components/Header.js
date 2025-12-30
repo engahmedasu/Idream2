@@ -10,7 +10,7 @@ import './Header.css';
 
 const Header = ({ onCartClick }) => {
   const { user, logout } = useAuth();
-  const { getCartItemCount } = useCart();
+  const { getCartItemCount, clearCart } = useCart();
   const { t } = useTranslation();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -45,7 +45,14 @@ const Header = ({ onCartClick }) => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      // Clear cart before logging out (while user still exists)
+      await clearCart();
+    } catch (error) {
+      // Ignore errors during cart clear, still proceed with logout
+      console.error('Error clearing cart during logout:', error);
+    }
     logout();
     navigate('/');
   };

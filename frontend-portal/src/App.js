@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CartSidebar from './components/CartSidebar';
+import AIAgent from './components/AIAgent';
 import Home from './pages/Home';
 import CategoryPage from './pages/CategoryPage';
 import ProductDetail from './pages/ProductDetail';
@@ -17,6 +18,7 @@ import VerifyOTP from './pages/VerifyOTP';
 import Account from './pages/Account';
 import EnterprisePortal from './pages/EnterprisePortal';
 import SubscriptionPlans from './pages/SubscriptionPlans';
+import PageDetail from './pages/PageDetail';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
@@ -41,10 +43,12 @@ function AppContent() {
           <Route path="/verify-otp" element={<VerifyOTP />} />
           <Route path="/enterprise-portal" element={<EnterprisePortal />} />
           <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+          <Route path="/page/:slug" element={<PageDetail />} />
         </Routes>
       </main>
       {!isEnterprisePortal && <Footer />}
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      {!isEnterprisePortal && <AIAgent />}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

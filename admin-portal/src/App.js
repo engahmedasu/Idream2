@@ -14,6 +14,8 @@ import Roles from './pages/Roles';
 import Permissions from './pages/Permissions';
 import Reports from './pages/Reports';
 import SubscriptionPlans from './pages/SubscriptionPlans';
+import Pages from './pages/Pages';
+import ContactRequests from './pages/ContactRequests';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -135,6 +137,22 @@ function AppRoutes() {
           element={
             <RoleProtectedRoute allowedRoles={['superAdmin', 'Finance']}>
               <Reports reportType="subscription-logs" />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="pages" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <Pages />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="contact-requests" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <ContactRequests />
             </RoleProtectedRoute>
           } 
         />

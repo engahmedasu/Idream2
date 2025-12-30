@@ -19,7 +19,8 @@ import {
   FiList,
   FiChevronDown,
   FiChevronRight,
-  FiVideo
+  FiVideo,
+  FiMail
 } from 'react-icons/fi';
 import './Layout.css';
 
@@ -48,6 +49,16 @@ const Layout = () => {
         { path: '/users', label: 'Users', icon: FiUsers, roles: ['superAdmin'] },
         { path: '/roles', label: 'Roles', icon: FiShield, roles: ['superAdmin'] },
         { path: '/permissions', label: 'Permissions', icon: FiKey, roles: ['superAdmin'] }
+      ]
+    },
+    {
+      type: 'group',
+      label: 'Pages',
+      icon: FiFileText,
+      roles: ['superAdmin'],
+      children: [
+        { path: '/pages', label: 'Pages', icon: FiFileText, roles: ['superAdmin'] },
+        { path: '/contact-requests', label: 'Contact Requests', icon: FiMail, roles: ['superAdmin'] }
       ]
     },
     {

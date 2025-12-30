@@ -1,0 +1,270 @@
+.page-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 2rem;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.page-modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.page-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.page-modal-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.page-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: 36px;
+  height: 36px;
+}
+
+.page-modal-close:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.page-modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.page-modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: #6b7280;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.page-modal-error {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #dc2626;
+}
+
+.page-modal-error p {
+  margin: 0.5rem 0;
+}
+
+.error-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.page-modal-content-text {
+  color: #374151;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+.page-modal-content-text h1,
+.page-modal-content-text h2,
+.page-modal-content-text h3,
+.page-modal-content-text h4,
+.page-modal-content-text h5,
+.page-modal-content-text h6 {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.page-modal-content-text h1 {
+  font-size: 2rem;
+}
+
+.page-modal-content-text h2 {
+  font-size: 1.75rem;
+}
+
+.page-modal-content-text h3 {
+  font-size: 1.5rem;
+}
+
+.page-modal-content-text p {
+  margin-bottom: 1rem;
+}
+
+.page-modal-content-text ul,
+.page-modal-content-text ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.page-modal-content-text.rtl ul,
+.page-modal-content-text.rtl ol {
+  padding-left: 0;
+  padding-right: 2rem;
+}
+
+.page-modal-content-text li {
+  margin-bottom: 0.5rem;
+}
+
+.page-modal-content-text a {
+  color: #667eea;
+  text-decoration: underline;
+}
+
+.page-modal-content-text a:hover {
+  color: #5568d3;
+}
+
+.page-modal-content-text img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.page-modal-content-text blockquote {
+  border-left: 4px solid #667eea;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.page-modal-content-text.rtl blockquote {
+  border-left: none;
+  border-right: 4px solid #667eea;
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+.page-modal-content-text table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+}
+
+.page-modal-content-text table td,
+.page-modal-content-text table th {
+  border: 1px solid #d1d5db;
+  padding: 0.75rem;
+}
+
+.page-modal-content-text table th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+/* RTL Support */
+.page-modal-content.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.page-modal-content.rtl .page-modal-header {
+  flex-direction: row-reverse;
+}
+
+.page-modal-content.rtl .page-modal-content-text {
+  font-family: 'Arial', 'Tahoma', 'Segoe UI', sans-serif;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-modal-overlay {
+    padding: 1rem;
+  }
+
+  .page-modal-content {
+    max-height: 95vh;
+  }
+
+  .page-modal-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .page-modal-title {
+    font-size: 1.25rem;
+  }
+
+  .page-modal-body {
+    padding: 1.5rem;
+  }
+
+  .page-modal-content-text {
+    font-size: 0.875rem;
+  }
+}
+

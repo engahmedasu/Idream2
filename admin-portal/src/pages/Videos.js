@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiPlus, FiEdit, FiTrash2, FiSearch, FiArrowUp, FiArrowDown, FiImage, FiX, FiVideo

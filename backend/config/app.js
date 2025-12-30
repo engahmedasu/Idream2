@@ -113,6 +113,48 @@ const config = {
     enabled: !isProduction,
     path: '/api-docs',
   },
+
+  // AI Agent Configuration
+  ai: {
+    // AI Service Provider (openai, anthropic, custom, none)
+    provider: process.env.AI_PROVIDER || 'none',
+    
+    // OpenAI Configuration
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY || '',
+      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo', // Default to gpt-3.5-turbo (more accessible)
+      temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
+      maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS, 10) || 500,
+    },
+    
+    // Anthropic Configuration
+    anthropic: {
+      apiKey: process.env.ANTHROPIC_API_KEY || '',
+      model: process.env.ANTHROPIC_MODEL || 'claude-3-opus-20240229',
+      maxTokens: parseInt(process.env.ANTHROPIC_MAX_TOKENS, 10) || 500,
+    },
+    
+    // Custom AI Service
+    custom: {
+      apiUrl: process.env.CUSTOM_AI_API_URL || '',
+      apiKey: process.env.CUSTOM_AI_API_KEY || '',
+    },
+    
+    // Search Configuration
+    search: {
+      maxProducts: parseInt(process.env.AI_MAX_PRODUCTS, 10) || 5,
+      maxShops: parseInt(process.env.AI_MAX_SHOPS, 10) || 5,
+      enableProductSearch: process.env.AI_ENABLE_PRODUCT_SEARCH !== 'false',
+      enableShopSearch: process.env.AI_ENABLE_SHOP_SEARCH !== 'false',
+    },
+    
+    // Response Configuration
+    response: {
+      includeImages: process.env.AI_INCLUDE_IMAGES === 'true',
+      includeLinks: process.env.AI_INCLUDE_LINKS !== 'false',
+      maxResponseLength: parseInt(process.env.AI_MAX_RESPONSE_LENGTH, 10) || 1000,
+    },
+  },
 };
 
 // Validate required configuration
