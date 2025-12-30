@@ -106,7 +106,7 @@ const Login = () => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form onSubmit={handleSubmit} className="auth-form" autoComplete="off">
           <div className="form-group">
             <label>
               {loginType === 'phone' ? t('auth.mobileNumber') : t('auth.email')}
@@ -127,6 +127,7 @@ const Login = () => {
                     ? t('auth.phonePlaceholder')
                     : 'example@email.com'
                 }
+                autoComplete="off"
                 required
               />
             </div>
@@ -141,6 +142,7 @@ const Login = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder={t('auth.passwordPlaceholder')}
+                autoComplete="new-password"
                 required
               />
             </div>

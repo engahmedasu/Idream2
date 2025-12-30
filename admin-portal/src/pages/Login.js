@@ -83,7 +83,7 @@ const Login = () => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form" autoComplete="off">
           <div className="form-group">
             <label>{loginType === 'email' ? 'Email' : 'Phone Number'}</label>
             <input
@@ -92,6 +92,7 @@ const Login = () => {
               value={formData.identifier}
               onChange={handleChange}
               placeholder={loginType === 'email' ? 'your-email@example.com' : '01xxxxxxxxx'}
+              autoComplete="off"
               required
             />
           </div>
@@ -102,6 +103,7 @@ const Login = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              autoComplete="new-password"
               required
             />
           </div>
