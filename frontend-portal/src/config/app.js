@@ -21,11 +21,14 @@ const config = {
 
   // API Configuration
   api: {
-    baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api',
+    baseURL: process.env.REACT_APP_API_URL || (isProduction ? 'https://api.idreamegypt.com/api' : 'http://localhost:5000/api'),
     timeout: 30000, // 30 seconds
     retryAttempts: isProduction ? 3 : 1,
     retryDelay: 1000, // 1 second
   },
+
+  // Image Base URL (for serving uploaded images)
+  imageBaseURL: process.env.REACT_APP_IMAGE_BASE_URL || (isProduction ? 'https://api.idreamegypt.com' : 'http://localhost:5000'),
 
   // Admin Portal URL
   adminPortal: {

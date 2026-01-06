@@ -219,20 +219,20 @@ node -e "require('dotenv').config(); const mongoose = require('mongoose'); mongo
 
 **Backend API:**
 ```
-https://api.idream.com
-https://api.idream.com/api
+https://api.idreamegypt.com
+https://api.idreamegypt.com/api
 ```
 
 **Frontend Portal:**
 ```
-https://www.idream.com
-https://idream.com
+https://mall.idreamegypt.com
+https://idreamegypt.com
 ```
 
 **Admin Portal:**
 ```
-https://admin.idream.com
-https://portal.idream.com
+https://admin.idreamegypt.com
+https://portal.idreamegypt.com
 ```
 
 ### Example .env Files for Production
@@ -246,19 +246,19 @@ JWT_SECRET=<generated-64-character-random-string>
 JWT_EXPIRE=7d
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=noreply@idream.com
+EMAIL_USER=noreply@idreamegypt.com
 EMAIL_PASS=<gmail-app-password>
 ```
 
 **frontend-portal/.env:**
 ```env
-REACT_APP_API_URL=https://api.idream.com/api
-REACT_APP_ADMIN_PORTAL_URL=https://admin.idream.com
+REACT_APP_API_URL=https://api.idreamegypt.com/api
+REACT_APP_ADMIN_PORTAL_URL=https://admin.idreamegypt.com
 ```
 
 **admin-portal/.env:**
 ```env
-REACT_APP_API_URL=https://api.idream.com/api
+REACT_APP_API_URL=https://api.idreamegypt.com/api
 ```
 
 ## 📝 Notes

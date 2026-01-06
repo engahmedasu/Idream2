@@ -82,32 +82,41 @@ exports.createUser = async (req, res) => {
 // Update user
 exports.updateUser = async (req, res) => {
   try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update fields
     const updateData = {
       ...req.body,
       updatedBy: req.user._id
     };
 
-    // Don't allow password update through this route
-    delete updateData.password;
+    // Handle password update - if provided, it will be hashed by pre-save hook
+    if (updateData.password) {
+      user.password = updateData.password; // Will be hashed by pre-save hook
+    }
 
     // Handle shop field: convert empty string to null to remove shop assignment
     if (updateData.shop === '' || updateData.shop === null || updateData.shop === undefined) {
       updateData.shop = null;
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    )
-      .populate('role shop')
-      .select('-password');
+    // Update other fields (excluding password which is handled above)
+    const { password, ...otherFields } = updateData;
+    Object.assign(user, otherFields);
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    // Save user (this will trigger password hashing if password was modified)
+    await user.save();
 
-    res.json(user);
+    await user.populate('role shop');
+    
+    res.json({
+      ...user.toObject(),
+      password: undefined
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

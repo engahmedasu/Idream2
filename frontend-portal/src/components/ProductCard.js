@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import ProductModal from './ProductModal';
 import './ProductCard.css';
 
@@ -73,7 +74,7 @@ const ProductCard = ({ product }) => {
       <div className="product-card" onClick={handleCardClick}>
         <div className="product-image">
           <img
-            src={`http://localhost:5000${product.image}`}
+            src={getImageUrl(product.image)}
             alt={product.name}
             onError={(e) => {
               e.target.src = 'https://via.placeholder.com/300x300?text=No+Image';

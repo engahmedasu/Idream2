@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import './VideoBanner.css';
 
 const VideoBanner = () => {
@@ -58,7 +59,7 @@ const VideoBanner = () => {
     
     // If it's a local file URL
     if (video.videoUrl.startsWith('/uploads/')) {
-      return `http://localhost:5000${video.videoUrl}`;
+      return getImageUrl(video.videoUrl);
     }
     
     // Otherwise return as is (Vimeo, etc.)
@@ -102,7 +103,7 @@ const VideoBanner = () => {
   const currentVideo = videos[currentIndex];
   const videoSource = getVideoSource(currentVideo);
   const thumbnailUrl = currentVideo?.thumbnailUrl 
-    ? `http://localhost:5000${currentVideo.thumbnailUrl}` 
+    ? getImageUrl(currentVideo.thumbnailUrl)
     : null;
 
   const isYouTube = videoSource?.includes('youtube.com/embed');

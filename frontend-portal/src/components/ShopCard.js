@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FiShare2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import './ShopCard.css';
 
 const ShopCard = ({ shop }) => {
@@ -47,7 +48,7 @@ const ShopCard = ({ shop }) => {
     <Link to={`/shop/${shop.shareLink}`} className="shop-card">
       <div className="shop-image">
         <img
-          src={shop.image ? `http://localhost:5000${shop.image}` : 'https://via.placeholder.com/400x250?text=Shop'}
+          src={shop.image ? getImageUrl(shop.image) : 'https://via.placeholder.com/400x250?text=Shop'}
           alt={shop.name}
           onError={(e) => {
             e.target.src = 'https://via.placeholder.com/400x250?text=Shop';

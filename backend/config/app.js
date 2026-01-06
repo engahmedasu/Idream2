@@ -72,13 +72,19 @@ const config = {
     secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
     user: process.env.EMAIL_USER || '',
     password: process.env.EMAIL_PASS || '',
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@idream.com',
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@idreamegypt.com',
   },
 
   // CORS Configuration
   cors: {
     origin: isProduction 
-      ? (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['https://idream.com'])
+      ? (process.env.CORS_ORIGIN 
+          ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+          : [
+              'https://mall.idreamegypt.com',
+              'https://idreamegypt.com',
+              'https://admin.idreamegypt.com'
+            ])
       : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],

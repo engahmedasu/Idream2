@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import './CartSidebar.css';
 
 const CartSidebar = ({ isOpen, onClose }) => {
@@ -149,7 +150,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                     <div key={item._id} className="cart-item">
                       <div className="cart-item-image">
                         <img
-                          src={`http://localhost:5000${item.product.image}`}
+                          src={getImageUrl(item.product.image)}
                           alt={item.product.name}
                         />
                       </div>

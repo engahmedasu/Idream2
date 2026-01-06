@@ -4,6 +4,7 @@ import { FiTrash2, FiMinus, FiPlus } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import getImageUrl from '../utils/imageUrl';
 import './Cart.css';
 
 const Cart = () => {
@@ -60,7 +61,7 @@ const Cart = () => {
               <div key={item._id} className="cart-item">
                 <div className="cart-item-image">
                   <img
-                    src={`http://localhost:5000${item.product.image}`}
+                    src={getImageUrl(item.product.image)}
                     alt={item.product.name}
                   />
                 </div>

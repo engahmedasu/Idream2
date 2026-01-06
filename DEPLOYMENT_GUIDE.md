@@ -131,7 +131,7 @@ sudo systemctl status mongod
 
 #### Option B: MongoDB Atlas (Cloud - Recommended for Production)
 
-If using MongoDB Atlas, skip the MongoDB installation and use the connection string from Atlas dashboard. You'll configure it in the backend `.env` file.
+**Production MongoDB Atlas is already configured.** The connection string is set up in the backend `.env` file (see Step 4.3). You can skip the local MongoDB installation steps if using Atlas.
 
 ### 2.3 Install Nginx
 
@@ -179,8 +179,8 @@ mongosh
 use idream
 
 db.createUser({
-  user: "idream_admin",
-  pwd: "your-secure-password-here",
+  user: "idream_db_user",
+  pwd: "aihKqt50kYMGiwtr",
   roles: [
     { role: "readWrite", db: "idream" },
     { role: "dbAdmin", db: "idream" }
@@ -207,11 +207,17 @@ sudo systemctl restart mongod
 
 ### 3.3 If Using MongoDB Atlas
 
+**Production MongoDB Atlas is already configured.**
+
+Connection details:
+- **Cluster**: psteg (MongoDB Atlas)
+- **Database User**: idream_db_user
+- **Connection String**: Already configured in backend `.env` file
+
+**Note**: If you need to whitelist a new server IP address:
 1. Go to https://www.mongodb.com/cloud/atlas
-2. Create a free cluster
-3. Create a database user
-4. Whitelist your server IP address
-5. Get connection string from Atlas dashboard
+2. Navigate to Network Access
+3. Add your server IP address to the whitelist
 
 ---
 
@@ -223,7 +229,7 @@ sudo systemctl restart mongod
 cd /var/www/idream
 
 # Option 1: Clone from Git repository
-git clone <your-repository-url> temp-repo
+git clone https://github.com/engahmedasu/Idream2.git temp-repo
 cp -r temp-repo/backend/* /var/www/idream/backend/
 rm -rf temp-repo
 
@@ -257,10 +263,10 @@ NODE_ENV=production
 PORT=5000
 
 # For Local MongoDB
-MONGODB_URI=mongodb://idream_admin:your-secure-password@localhost:27017/idream?authSource=idream
+# MONGODB_URI=mongodb://idream_admin:your-secure-password@localhost:27017/idream?authSource=idream
 
-# For MongoDB Atlas (replace with your connection string)
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/idream?retryWrites=true&w=majority
+# For MongoDB Atlas (Production)
+MONGODB_URI=mongodb+srv://idream_db_user:aihKqt50kYMGiwtr@psteg.qmqc74r.mongodb.net/idream?retryWrites=true&w=majority&appName=psteg
 
 # Generate a secure JWT secret
 # Run: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -272,6 +278,10 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
+
+# CORS Configuration (allowed origins for API access)
+# Separate multiple origins with commas (no spaces)
+CORS_ORIGIN=https://mall.idreamegypt.com,https://idreamegypt.com,https://admin.idreamegypt.com
 ```
 
 ### 4.4 Initialize Database
@@ -340,21 +350,25 @@ rm -rf temp-repo
 
 ### 5.2 Configure Frontend Environment
 
+**IMPORTANT**: Environment variables must be set BEFORE building. React embeds these at build time, not runtime.
+
 ```bash
 cd /var/www/idream/frontend-portal
 
-# Copy environment template
-cp .env.prod.example .env.prod
-
-# Edit environment file
-nano .env
+# Create production environment file
+nano .env.prod
 ```
 
-Configure:
+Add the following (replace with your production values):
 
 ```env
-REACT_APP_API_URL=https://api.yourdomain.com/api
-REACT_APP_ADMIN_PORTAL_URL=https://admin.yourdomain.com
+REACT_APP_API_URL=https://api.idreamegypt.com/api
+REACT_APP_ADMIN_PORTAL_URL=https://admin.idreamegypt.com
+```
+
+**Verify the file exists and has correct values:**
+```bash
+cat .env.prod
 ```
 
 ### 5.3 Install Dependencies and Build
@@ -363,11 +377,13 @@ REACT_APP_ADMIN_PORTAL_URL=https://admin.yourdomain.com
 # Install dependencies
 npm install
 
-# Build for production
-npm run build
+# Build for production (MUST use build:prod to load .env.prod)
+npm run build:prod
 
 # The build output will be in the 'build' directory
 ```
+
+**Important**: Always use `npm run build:prod` (not `npm run build`) to ensure the `.env.prod` file is loaded with the correct API URL.
 
 ### 5.4 Set Permissions
 
@@ -397,20 +413,24 @@ rm -rf temp-repo
 
 ### 6.2 Configure Admin Portal Environment
 
+**IMPORTANT**: Environment variables must be set BEFORE building. React embeds these at build time, not runtime.
+
 ```bash
 cd /var/www/idream/admin-portal
 
-# Copy environment template
-cp .env.prod.example .env.prod
-
-# Edit environment file
-nano .env
+# Create production environment file
+nano .env.prod
 ```
 
-Configure:
+Add the following:
 
 ```env
-REACT_APP_API_URL=https://api.yourdomain.com/api
+REACT_APP_API_URL=https://api.idreamegypt.com/api
+```
+
+**Verify the file exists and has correct values:**
+```bash
+cat .env.prod
 ```
 
 ### 6.3 Install Dependencies and Build
@@ -419,11 +439,13 @@ REACT_APP_API_URL=https://api.yourdomain.com/api
 # Install dependencies
 npm install
 
-# Build for production
-npm run build
+# Build for production (MUST use build:prod to load .env.prod)
+npm run build:prod
 
 # The build output will be in the 'build' directory
 ```
+
+**Important**: Always use `npm run build:prod` (not `npm run build`) to ensure the `.env.prod` file is loaded with the correct API URL.
 
 ### 6.4 Set Permissions
 
@@ -448,13 +470,15 @@ Add the following configuration:
 ```nginx
 server {
     listen 80;
-    server_name api.yourdomain.com;
+    server_name api.idreamegypt.com;
 
     # Redirect HTTP to HTTPS (will be configured after SSL)
     # For now, comment this out until SSL is set up
     # return 301 https://$server_name$request_uri;
 
     # Location for API
+    # Note: proxy_pass points to internal backend (localhost:5000)
+    # External API URL: https://api.idreamegypt.com
     location / {
         proxy_pass http://localhost:5000;
         proxy_http_version 1.1;
@@ -474,7 +498,7 @@ server {
 
     # File upload size limit (for videos and images)
     client_max_body_size 100M;
-}backe
+}
 ```
 
 ### 7.2 Create Nginx Configuration for Frontend Portal
@@ -488,7 +512,7 @@ Add the following configuration:
 ```nginx
 server {
     listen 80;
-    server_name www.yourdomain.com yourdomain.com;
+    server_name mall.idreamegypt.com idreamegypt.com;
 
     # Redirect HTTP to HTTPS (will be configured after SSL)
     # return 301 https://$server_name$request_uri;
@@ -530,7 +554,7 @@ Add the following configuration:
 ```nginx
 server {
     listen 80;
-    server_name admin.yourdomain.com;
+    server_name admin.idreamegypt.com;
 
     # Redirect HTTP to HTTPS (will be configured after SSL)
     # return 301 https://$server_name$request_uri;
@@ -587,13 +611,13 @@ sudo systemctl reload nginx
 
 ```bash
 # Obtain SSL certificate for backend API
-sudo certbot --nginx -d api.yourdomain.com
+sudo certbot --nginx -d api.idreamegypt.com
 
 # Obtain SSL certificate for frontend portal
-sudo certbot --nginx -d www.yourdomain.com -d yourdomain.com
+sudo certbot --nginx -d mall.idreamegypt.com -d idreamegypt.com
 
 # Obtain SSL certificate for admin portal
-sudo certbot --nginx -d admin.yourdomain.com
+sudo certbot --nginx -d admin.idreamegypt.com
 ```
 
 Certbot will automatically:
@@ -612,60 +636,48 @@ After SSL is installed, Certbot will have updated the configs. Verify the config
 sudo certbot renew --dry-run
 ```
 
-### 8.4 Update Backend CORS Settings
+### 8.4 Configure Backend CORS Settings
 
-**Important**: Update CORS in `backend/server.js` to restrict access to your production domains:
+**Important**: CORS is configured via the `CORS_ORIGIN` environment variable in the backend `.env` file. The backend automatically uses the correct production domains if `CORS_ORIGIN` is not set, but it's recommended to set it explicitly.
+
+**Verify CORS configuration in backend `.env` file:**
 
 ```bash
-nano /var/www/idream/backend/server.js
+cd /var/www/idream/backend
+nano .env.prod
 ```
 
-Find the line:
-```javascript
-app.use(cors());
-```
+Make sure the following line is present (it should already be there from Step 4.3):
 
-Replace with:
-```javascript
-// CORS configuration for production
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['https://www.yourdomain.com', 'https://yourdomain.com', 'https://admin.yourdomain.com'];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-```
-
-Alternatively, you can add `ALLOWED_ORIGINS` to your `.env` file:
 ```env
-ALLOWED_ORIGINS=https://www.yourdomain.com,https://yourdomain.com,https://admin.yourdomain.com
+CORS_ORIGIN=https://mall.idreamegypt.com,https://idreamegypt.com,https://admin.idreamegypt.com
 ```
 
-Then update server.js to use:
-```javascript
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
-  credentials: true
-}));
-```
+**Note**: 
+- The backend config (`backend/config/app.js`) automatically handles CORS configuration
+- If `CORS_ORIGIN` is not set, it defaults to the production domains
+- Separate multiple origins with commas (no spaces)
+- The backend must be restarted after changing CORS settings
 
-Restart backend:
+**Restart backend to apply changes:**
+
 ```bash
 pm2 restart idream-backend
 ```
+
+**Verify CORS is working:**
+
+```bash
+# Test CORS from admin portal
+curl -H "Origin: https://admin.idreamegypt.com" \
+     -H "Access-Control-Request-Method: GET" \
+     -H "Access-Control-Request-Headers: Content-Type" \
+     -X OPTIONS \
+     https://api.idreamegypt.com/api/health \
+     -v
+```
+
+You should see `Access-Control-Allow-Origin: https://admin.idreamegypt.com` in the response headers.
 
 ---
 
@@ -771,24 +783,24 @@ sudo ufw status
 
 ```bash
 # Test health endpoint
-curl https://api.yourdomain.com/api/health
+curl https://api.idreamegypt.com/api/health
 
 # Test with authentication (if needed)
-curl -X POST https://api.yourdomain.com/api/auth/login \
+curl -X POST https://api.idreamegypt.com/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"superadmin@idream.com","password":"P@ssw0rd123"}'
+  -d '{"email":"superadmin@idreamegypt.com","password":"P@ssw0rd123"}'
 ```
 
 ### 11.2 Test Frontend Portal
 
-1. Open browser: `https://www.yourdomain.com`
+1. Open browser: `https://mall.idreamegypt.com` or `https://idreamegypt.com`
 2. Verify homepage loads
 3. Test navigation
 4. Test API calls
 
 ### 11.3 Test Admin Portal
 
-1. Open browser: `https://admin.yourdomain.com`
+1. Open browser: `https://admin.idreamegypt.com`
 2. Login with superadmin credentials
 3. Test dashboard and features
 
@@ -827,12 +839,16 @@ pm2 restart idream-backend
 # 5. For frontend/admin portal
 cd /var/www/idream/frontend-portal
 npm install
-npm run build
+# Verify .env.prod exists and has correct API URL
+cat .env.prod
+npm run build:prod
 sudo systemctl reload nginx
 
 cd /var/www/idream/admin-portal
 npm install
-npm run build
+# Verify .env.prod exists and has correct API URL
+cat .env.prod
+npm run build:prod
 sudo systemctl reload nginx
 ```
 
@@ -851,11 +867,11 @@ BACKUP_DIR="/var/backups/idream"
 DATE=$(date +%Y%m%d_%H%M%S)
 mkdir -p $BACKUP_DIR
 
-# Local MongoDB backup
-mongodump --uri="mongodb://idream_admin:password@localhost:27017/idream" --out=$BACKUP_DIR/$DATE
+# Local MongoDB backup (if using local MongoDB)
+# mongodump --uri="mongodb://idream_admin:password@localhost:27017/idream" --out=$BACKUP_DIR/$DATE
 
-# For MongoDB Atlas, use:
-# mongodump --uri="mongodb+srv://username:password@cluster.mongodb.net/idream" --out=$BACKUP_DIR/$DATE
+# MongoDB Atlas backup (Production)
+mongodump --uri="mongodb+srv://idream_db_user:aihKqt50kYMGiwtr@psteg.qmqc74r.mongodb.net/idream?retryWrites=true&w=majority&appName=psteg" --out=$BACKUP_DIR/$DATE
 
 # Compress backup
 tar -czf $BACKUP_DIR/$DATE.tar.gz $BACKUP_DIR/$DATE
@@ -895,6 +911,50 @@ sudo tail -f /var/log/mongodb/mongod.log
 
 ## Troubleshooting
 
+### Frontend/Admin Portal Calling localhost:5000 Instead of Production API
+
+**Symptoms**: Login or API calls fail, browser console shows requests to `http://localhost:5000/api`
+
+**Cause**: Environment variables were not set during build, or wrong build command was used.
+
+**Solution**:
+
+```bash
+# 1. Check if .env.prod file exists and has correct values
+cd /var/www/idream/frontend-portal
+cat .env.prod
+# Should show: REACT_APP_API_URL=https://api.idreamegypt.com/api
+
+cd /var/www/idream/admin-portal
+cat .env.prod
+# Should show: REACT_APP_API_URL=https://api.idreamegypt.com/api
+
+# 2. If missing or incorrect, create/update the file
+cd /var/www/idream/frontend-portal
+nano .env.prod
+# Add: REACT_APP_API_URL=https://api.idreamegypt.com/api
+# Add: REACT_APP_ADMIN_PORTAL_URL=https://admin.idreamegypt.com
+
+cd /var/www/idream/admin-portal
+nano .env.prod
+# Add: REACT_APP_API_URL=https://api.idreamegypt.com/api
+
+# 3. Rebuild with production environment
+cd /var/www/idream/frontend-portal
+npm run build:prod
+
+cd /var/www/idream/admin-portal
+npm run build:prod
+
+# 4. Reload Nginx
+sudo systemctl reload nginx
+```
+
+**Important**: 
+- Always use `npm run build:prod` (not `npm run build`)
+- Environment variables are embedded at BUILD time, not runtime
+- After updating .env.prod, you MUST rebuild the application
+
 ### Backend Not Starting
 
 ```bash
@@ -928,14 +988,13 @@ sudo systemctl reload nginx
 ### Database Connection Issues
 
 ```bash
-# Test MongoDB connection
-mongosh "mongodb://idream_admin:password@localhost:27017/idream"
+# Test MongoDB Atlas connection (Production)
+mongosh "mongodb+srv://idream_db_user:aihKqt50kYMGiwtr@psteg.qmqc74r.mongodb.net/idream?retryWrites=true&w=majority&appName=psteg"
 
-# Check MongoDB status
-sudo systemctl status mongod
-
-# Check MongoDB logs
-sudo tail -f /var/log/mongodb/mongod.log
+# For local MongoDB (if using local installation)
+# mongosh "mongodb://idream_admin:password@localhost:27017/idream"
+# sudo systemctl status mongod
+# sudo tail -f /var/log/mongodb/mongod.log
 ```
 
 ### SSL Certificate Issues
@@ -964,6 +1023,41 @@ chmod -R 755 /var/www/idream/backend/uploads
 # Check Nginx client_max_body_size setting
 sudo grep client_max_body_size /etc/nginx/sites-available/idream-backend
 ```
+
+### CORS Errors
+
+**Symptoms**: Browser console shows "Access to XMLHttpRequest blocked by CORS policy" or "No 'Access-Control-Allow-Origin' header is present"
+
+**Solution**:
+
+```bash
+# 1. Check CORS_ORIGIN in backend .env file
+cd /var/www/idream/backend
+cat .env.prod | grep CORS_ORIGIN
+
+# 2. If missing or incorrect, add/update it
+nano .env.prod
+# Add or update:
+CORS_ORIGIN=https://mall.idreamegypt.com,https://idreamegypt.com,https://admin.idreamegypt.com
+
+# 3. Restart backend to apply changes
+pm2 restart idream-backend
+
+# 4. Verify CORS is working
+curl -H "Origin: https://admin.idreamegypt.com" \
+     -H "Access-Control-Request-Method: GET" \
+     -X OPTIONS \
+     https://api.idreamegypt.com/api/health \
+     -v
+
+# You should see "Access-Control-Allow-Origin: https://admin.idreamegypt.com" in response
+```
+
+**Common Issues**:
+- Missing `CORS_ORIGIN` in `.env.prod` file
+- Backend not restarted after changing CORS settings
+- Wrong domain in `CORS_ORIGIN` (must match exactly, including `https://`)
+- Multiple origins not separated correctly (use commas, no spaces)
 
 ---
 

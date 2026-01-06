@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import './HeroCarousel.css';
 
 const HeroCarousel = ({ categoryId }) => {
@@ -43,7 +44,7 @@ const HeroCarousel = ({ categoryId }) => {
     <div className="hero-carousel">
       <Link to={`/product/${currentOffer._id}`} className="carousel-slide">
         <div className="carousel-image">
-          <img src={`http://localhost:5000${currentOffer.image}`} alt={currentOffer.name} />
+          <img src={getImageUrl(currentOffer.image)} alt={currentOffer.name} />
         </div>
         <div className="carousel-content">
           <h2>{currentOffer.name}</h2>

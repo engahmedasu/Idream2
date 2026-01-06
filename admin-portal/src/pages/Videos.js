@@ -5,6 +5,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 import './Videos.css';
 
@@ -180,8 +181,8 @@ const Videos = () => {
       priority: video.priority || 0,
       isActive: video.isActive
     });
-    setVideoPreview(video.videoUrl ? `http://localhost:5000${video.videoUrl}` : '');
-    setThumbnailPreview(video.thumbnailUrl ? `http://localhost:5000${video.thumbnailUrl}` : '');
+    setVideoPreview(video.videoUrl ? getImageUrl(video.videoUrl) : '');
+    setThumbnailPreview(video.thumbnailUrl ? getImageUrl(video.thumbnailUrl) : '');
     setVideoFile(null);
     setThumbnailFile(null);
     setShowModal(true);
@@ -390,7 +391,7 @@ const Videos = () => {
                   <td>
                     {video.thumbnailUrl ? (
                       <img
-                        src={`http://localhost:5000${video.thumbnailUrl}`}
+                        src={getImageUrl(video.thumbnailUrl)}
                         alt={video.title}
                         className="video-thumbnail"
                         onError={(e) => {

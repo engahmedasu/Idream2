@@ -25,12 +25,43 @@ const transporter = nodemailer.createTransport({
 transporter.verify((error, success) => {
   if (error) {
     console.error('❌ Email transporter verification failed:', error.message);
-    if (error.message.includes('BadCredentials') || error.message.includes('Username and Password not accepted')) {
+    
+    // Check for various authentication error patterns
+    const authErrors = [
+      'BadCredentials',
+      'Username and Password not accepted',
+      'Authentication Failed',
+      '535 Authentication Failed',
+      '535',
+      'EAUTH',
+      'Invalid login'
+    ];
+    
+    const isAuthError = authErrors.some(pattern => 
+      error.message.includes(pattern) || error.code === 'EAUTH'
+    );
+    
+    if (isAuthError) {
       console.error('\n📧 Gmail Authentication Error:');
       console.error('   1. Make sure you have 2-Factor Authentication enabled on your Gmail account');
       console.error('   2. Generate an App Password: https://myaccount.google.com/apppasswords');
       console.error('   3. Use the App Password (not your regular password) in EMAIL_PASS');
       console.error('   4. Make sure EMAIL_USER is your full Gmail address (e.g., yourname@gmail.com)');
+      console.error('   5. Check for extra spaces or quotes in your .env file');
+      console.error('   6. App Password should be exactly 16 characters (no spaces)');
+      console.error('\n🔍 Current Configuration:');
+      console.error(`   EMAIL_USER: ${config.email.user ? `"${config.email.user}" (${config.email.user.length} chars)` : '❌ NOT SET'}`);
+      console.error(`   EMAIL_PASS: ${config.email.password ? `"${'*'.repeat(config.email.password.length)}" (${config.email.password.length} chars)` : '❌ NOT SET'}`);
+      console.error(`   EMAIL_HOST: ${config.email.host}`);
+      console.error(`   EMAIL_PORT: ${config.email.port}`);
+      
+      // Additional checks
+      if (config.email.password && config.email.password.length !== 16) {
+        console.error('\n⚠️  WARNING: App Password should be 16 characters. Current length:', config.email.password.length);
+      }
+      if (config.email.user && !config.email.user.includes('@gmail.com')) {
+        console.error('\n⚠️  WARNING: EMAIL_USER should be a Gmail address');
+      }
     }
   } else {
     console.log('✅ Email transporter configured successfully');
@@ -65,12 +96,17 @@ exports.sendOTPEmail = async (email, otp) => {
     console.error('❌ Email sending error:', error.message);
     
     // Provide helpful error messages
-    if (error.message.includes('BadCredentials') || error.message.includes('Username and Password not accepted')) {
-      throw new Error('Gmail authentication failed. Please check your EMAIL_USER and EMAIL_PASS in .env file. You may need to use an App Password instead of your regular password.');
-    } else if (error.message.includes('Invalid login')) {
-      throw new Error('Invalid email credentials. Please verify EMAIL_USER and EMAIL_PASS in .env file.');
-    } else if (error.code === 'EAUTH') {
-      throw new Error('Email authentication failed. Please check your email credentials.');
+    const authErrors = [
+      'BadCredentials',
+      'Username and Password not accepted',
+      'Authentication Failed',
+      '535 Authentication Failed',
+      '535',
+      'Invalid login'
+    ];
+    
+    if (authErrors.some(pattern => error.message.includes(pattern)) || error.code === 'EAUTH') {
+      throw new Error('Gmail authentication failed. Please check your EMAIL_USER and EMAIL_PASS in .env file. You may need to use an App Password instead of your regular password. Make sure 2-Factor Authentication is enabled and you\'ve generated an App Password from https://myaccount.google.com/apppasswords');
     }
     
     throw error;

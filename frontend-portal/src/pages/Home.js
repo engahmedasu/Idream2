@@ -9,6 +9,7 @@ import VideoBanner from '../components/VideoBanner';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import './Home.css';
 
 const Home = () => {
@@ -279,7 +280,7 @@ const Home = () => {
                   >
                     <div className="offer-image">
                       <img
-                        src={`http://localhost:5000${offer.image}`}
+                        src={getImageUrl(offer.image)}
                         alt={offer.name}
                         onError={(e) => {
                           e.target.src = 'https://via.placeholder.com/400x250?text=Offer';

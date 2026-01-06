@@ -712,7 +712,7 @@ EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
-EMAIL_FROM=noreply@idream.com
+EMAIL_FROM=noreply@idreamegypt.com
 ```
 
 ### Installation Steps
@@ -783,7 +783,7 @@ Admin Portal runs on: `http://localhost:3001`
 
 ### Default Admin Account
 After seeding, default SuperAdmin credentials:
-- **Email**: admin@idream.com
+- **Email**: admin@idreamegypt.com
 - **Password**: (check seed script for password)
 
 ---

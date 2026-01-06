@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiImage, FiX, FiCheckCircle, FiXCircle, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 import './Shops.css';
 
@@ -236,7 +237,7 @@ const Shops = () => {
       isApproved: shop.isApproved || false
     });
     setNewProductType('');
-    setImagePreview(shop.image ? `http://localhost:5000${shop.image}` : '');
+    setImagePreview(shop.image ? getImageUrl(shop.image) : '');
     setImageFile(null);
     setShowModal(true);
   };
@@ -408,7 +409,7 @@ const Shops = () => {
                     <div className="shop-info">
                       {shop.image ? (
                         <img
-                          src={`http://localhost:5000${shop.image}`}
+                          src={getImageUrl(shop.image)}
                           alt={shop.name}
                           className="shop-thumbnail"
                           onError={(e) => {

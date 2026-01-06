@@ -4,6 +4,7 @@ import { FiShoppingCart, FiStar, FiMessageCircle } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import { toast } from 'react-toastify';
 import './ProductDetail.css';
 
@@ -108,7 +109,7 @@ const ProductDetail = () => {
         <div className="product-main">
           <div className="product-image-section">
             <img
-              src={`http://localhost:5000${product.image}`}
+              src={getImageUrl(product.image)}
               alt={product.name}
               onError={(e) => {
                 e.target.src = 'https://via.placeholder.com/500x500?text=No+Image';

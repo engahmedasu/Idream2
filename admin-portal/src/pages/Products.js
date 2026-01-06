@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiEdit, FiTrash2, FiSearch, FiImage, FiX, FiCheckCircle, FiXCircle, FiTag, FiTruck, FiShield } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 import './Products.css';
 
@@ -325,7 +326,7 @@ const Products = () => {
       isActive: product.isActive || false,
       isApproved: product.isApproved || false
     });
-    setImagePreview(product.image ? `http://localhost:5000${product.image}` : '');
+    setImagePreview(product.image ? getImageUrl(product.image) : '');
     setImageFile(null);
     setShowModal(true);
     
@@ -511,7 +512,7 @@ const Products = () => {
                     <div className="product-info">
                       {product.image ? (
                         <img
-                          src={`http://localhost:5000${product.image}`}
+                          src={getImageUrl(product.image)}
                           alt={product.name}
                           className="product-thumbnail"
                           onError={(e) => {

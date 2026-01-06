@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
+import getImageUrl from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
 import './Categories.css';
 
@@ -211,7 +212,7 @@ const Categories = () => {
       order: category.order || 0,
       isActive: category.isActive
     });
-    setImagePreview(category.image ? `http://localhost:5000${category.image}` : '');
+    setImagePreview(category.image ? getImageUrl(category.image) : '');
     setImageFile(null);
     setShowIconSelector(false);
     setShowModal(true);
@@ -446,7 +447,7 @@ const Categories = () => {
                   <td>
                     {category.image ? (
                       <img
-                        src={`http://localhost:5000${category.image}`}
+                        src={getImageUrl(category.image)}
                         alt={category.name}
                         className="category-thumbnail"
                         onError={(e) => {

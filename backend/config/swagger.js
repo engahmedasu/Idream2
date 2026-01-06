@@ -10,7 +10,7 @@ const options = {
       description: 'API documentation for iDream Portal - E-commerce platform with shop management',
       contact: {
         name: 'iDream Support',
-        email: 'support@idream.com'
+        email: 'support@idreamegypt.com'
       },
       license: {
         name: 'ISC',
@@ -19,11 +19,13 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api',
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://api.idreamegypt.com/api'
+          : 'http://localhost:5000/api',
         description: 'Development server'
       },
       {
-        url: 'https://api.idream.com/api',
+        url: 'https://api.idreamegypt.com/api',
         description: 'Production server'
       }
     ],
