@@ -249,6 +249,28 @@
   font-weight: 500;
 }
 
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.rating-value {
+  font-weight: 600;
+  color: #F59E0B;
+}
+
+.rating-stars {
+  font-size: 1rem;
+}
+
+.rating-reviews {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-left: 0.25rem;
+}
+
 .no-badge {
   color: #9ca3af;
   font-size: 0.75rem;
@@ -290,6 +312,28 @@
 .approval-status.pending {
   background: #FEF3C7;
   color: #92400E;
+}
+
+.external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4F46E5;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.external-link:hover {
+  background: #EEF2FF;
+  color: #4338CA;
+}
+
+.external-link svg {
+  font-size: 1rem;
 }
 
 .action-buttons {
@@ -521,16 +565,49 @@
   color: #6b7280;
 }
 
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
 .checkbox-group label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
   margin: 0;
+  font-size: 0.875rem;
+  color: #374151;
 }
 
 .checkbox-group input[type="checkbox"] {
   width: auto;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.checkbox-label:hover {
+  background: #f3f4f6;
+}
+
+.product-types-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .modal-actions {

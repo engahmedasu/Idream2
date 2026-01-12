@@ -19,6 +19,8 @@ import Account from './pages/Account';
 import EnterprisePortal from './pages/EnterprisePortal';
 import SubscriptionPlans from './pages/SubscriptionPlans';
 import PageDetail from './pages/PageDetail';
+// eslint-disable-next-line no-unused-vars
+import OrderSummary from './pages/OrderSummary';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
@@ -44,6 +46,7 @@ function AppContent() {
           <Route path="/enterprise-portal" element={<EnterprisePortal />} />
           <Route path="/subscription-plans" element={<SubscriptionPlans />} />
           <Route path="/page/:slug" element={<PageDetail />} />
+          <Route path="/order/:orderNumber" element={<OrderSummary />} />
         </Routes>
       </main>
       {!isEnterprisePortal && <Footer />}

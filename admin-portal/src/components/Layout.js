@@ -20,7 +20,11 @@ import {
   FiChevronDown,
   FiChevronRight,
   FiVideo,
-  FiMail
+  FiMail,
+  FiInbox,
+  FiZap,
+  FiBriefcase,
+  FiImage
 } from 'react-icons/fi';
 import './Layout.css';
 
@@ -62,6 +66,17 @@ const Layout = () => {
       ]
     },
     {
+      type: 'group',
+      label: 'Requests',
+      icon: FiInbox,
+      roles: ['superAdmin'],
+      children: [
+        { path: '/requests/join-our-team', label: 'Join Our Team', icon: FiUsers, roles: ['superAdmin'] },
+        { path: '/requests/new-ideas', label: 'New Ideas', icon: FiZap, roles: ['superAdmin'] },
+        { path: '/requests/hire-expert', label: 'Hire Expert', icon: FiBriefcase, roles: ['superAdmin'] }
+      ]
+    },
+    {
       type: 'item',
       path: '/categories',
       icon: FiGrid,
@@ -73,6 +88,13 @@ const Layout = () => {
       path: '/videos',
       icon: FiVideo,
       label: 'Videos',
+      roles: ['superAdmin']
+    },
+    {
+      type: 'item',
+      path: '/advertisements',
+      icon: FiImage,
+      label: 'Advertisements',
       roles: ['superAdmin']
     },
     {
@@ -192,7 +214,10 @@ const Layout = () => {
     <div className="admin-layout">
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h2>iDream Admin</h2>
+          <div className="logo-container">
+            <img src="/logo.svg" alt="iDREAM" className="sidebar-logo" />
+            <span className="admin-text">Admin</span>
+          </div>
           <button className="sidebar-close" onClick={() => setSidebarOpen(false)}>
             <FiX />
           </button>
@@ -284,6 +309,13 @@ const Layout = () => {
                 if (location.pathname.includes('/orders')) return 'Orders';
                 if (location.pathname.includes('/products')) return 'Products';
                 return 'Reports';
+              }
+              // Handle requests pages
+              if (location.pathname.includes('/requests/')) {
+                if (location.pathname.includes('/join-our-team')) return 'Join Our Team';
+                if (location.pathname.includes('/new-ideas')) return 'New Ideas';
+                if (location.pathname.includes('/hire-expert')) return 'Hire Expert';
+                return 'Requests';
               }
               return 'Dashboard';
             })()

@@ -3,10 +3,20 @@
   min-height: calc(100vh - 200px);
 }
 
+.home-wrapper {
+  display: flex;
+  max-width: 2400px;
+  margin: auto auto;
+  padding: 2rem 0;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
 .home-container {
+  flex: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 2rem;
 }
 
 .welcome-banner {

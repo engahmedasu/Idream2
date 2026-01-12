@@ -18,10 +18,14 @@ const storage = multer.diskStorage({
       uploadPath = path.join(uploadDir, 'products');
     } else if (file.fieldname === 'image') {
       uploadPath = path.join(uploadDir, 'categories');
-    } else if (file.fieldname === 'video') {
+    } else     if (file.fieldname === 'video') {
       uploadPath = path.join(uploadDir, 'videos');
     } else if (file.fieldname === 'thumbnail') {
       uploadPath = path.join(uploadDir, 'videos', 'thumbnails');
+    } else if (file.fieldname === 'document' || file.fieldname === 'requestDocument') {
+      uploadPath = path.join(uploadDir, 'requests');
+    } else if (file.fieldname === 'advertisementImage' || file.fieldname === 'advertisement') {
+      uploadPath = path.join(uploadDir, 'advertisements');
     }
     
     if (!fs.existsSync(uploadPath)) {
@@ -37,6 +41,8 @@ const storage = multer.diskStorage({
       fieldName = 'video';
     } else if (file.fieldname === 'thumbnail') {
       fieldName = 'thumbnail';
+    } else if (file.fieldname === 'advertisementImage' || file.fieldname === 'advertisement') {
+      fieldName = 'advertisement';
     }
     cb(null, fieldName + '-' + uniqueSuffix + path.extname(file.originalname));
   }
@@ -67,6 +73,20 @@ const fileFilter = (req, file, cb) => {
       cb(new Error('Only image files are allowed for thumbnails'));
     }
   }
+  // For document uploads (requests), allow .doc, .docx, .pdf
+  else if (file.fieldname === 'document' || file.fieldname === 'requestDocument') {
+    const allowedTypes = /doc|docx|pdf/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = file.mimetype === 'application/msword' || 
+                    file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                    file.mimetype === 'application/pdf';
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only document files are allowed (.doc, .docx, .pdf)'));
+    }
+  }
   // For other uploads (images), use the original filter
   else {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -94,6 +114,14 @@ const videoUpload = multer({
   fileFilter: fileFilter
 });
 
+// Separate upload config for documents (10MB limit for .doc, .docx, .pdf)
+const documentUpload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB for documents
+  fileFilter: fileFilter
+});
+
 module.exports = upload;
 module.exports.videoUpload = videoUpload;
+module.exports.documentUpload = documentUpload;
 

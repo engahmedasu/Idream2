@@ -1,0 +1,78 @@
+.advertisement-container {
+  position: sticky;
+  top: 100px;
+  width: 100%;
+  max-width: 500px;
+  height: calc(100vh - 120px);
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.advertisement {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.advertisement.clickable {
+  cursor: pointer;
+}
+
+.advertisement.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.advertisement-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .advertisement-container {
+    width: 100%;
+    max-width: 150px;
+    height: calc(100vh - 120px);
+    padding: 0;
+  }
+}
+
+@media (max-width: 992px) {
+  .advertisement-container {
+    width: 100%;
+    max-width: 120px;
+    height: calc(100vh - 120px);
+    padding: 0;
+  }
+}
+
+/* Hide advertisements on tablets and mobile */
+@media (max-width: 768px) {
+  .advertisement-container {
+    display: none;
+  }
+}

@@ -3,7 +3,7 @@ import api from '../utils/api';
 import getImageUrl from '../utils/imageUrl';
 import './VideoBanner.css';
 
-const VideoBanner = () => {
+const VideoBanner = ({ categoryId = null }) => {
   const [videos, setVideos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -12,14 +12,20 @@ const VideoBanner = () => {
 
   useEffect(() => {
     fetchVideos();
-  }, []);
+  }, [categoryId]);
 
   const fetchVideos = async () => {
     try {
-      const response = await api.get('/videos?isActive=true');
+      const params = { isActive: true };
+      if (categoryId) {
+        params.category = categoryId;
+      }
+      const response = await api.get('/videos', { params });
       // Sort by priority (higher priority first)
       const sortedVideos = response.data.sort((a, b) => (b.priority || 0) - (a.priority || 0));
       setVideos(sortedVideos);
+      // Reset to first video when category changes
+      setCurrentIndex(0);
     } catch (error) {
       console.error('Error fetching videos:', error);
     } finally {

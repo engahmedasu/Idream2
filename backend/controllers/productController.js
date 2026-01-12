@@ -234,9 +234,53 @@ exports.createProduct = async (req, res) => {
     productData.shippingFees = parseFloat(productData.shippingFees) || 0;
   }
 
+    // Handle averageRating - validate and convert to number if provided
+    if (productData.averageRating !== undefined && productData.averageRating !== '' && productData.averageRating !== null) {
+      const rating = parseFloat(productData.averageRating);
+      if (!isNaN(rating) && rating >= 0 && rating <= 5) {
+        productData.averageRating = rating;
+        // Set totalReviews to 1 if rating is manually set (to indicate it has a rating)
+        if (!productData.totalReviews || productData.totalReviews === 0) {
+          productData.totalReviews = 1;
+        }
+      } else {
+        return res.status(400).json({ message: 'Rating must be a number between 0 and 5' });
+      }
+    } else {
+      // If no rating provided, use default (will be set by model default or existing logic)
+      delete productData.averageRating;
+    }
+
     // Convert boolean fields
     if (productData.isHotOffer !== undefined) {
       productData.isHotOffer = productData.isHotOffer === 'true' || productData.isHotOffer === true;
+    }
+
+    // Handle productType - can be JSON string, array, or comma-separated string
+    if (productData.productType !== undefined) {
+      if (typeof productData.productType === 'string') {
+        // Try parsing as JSON first
+        try {
+          const parsed = JSON.parse(productData.productType);
+          productData.productType = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
+        } catch {
+          // If not valid JSON, check if it's comma-separated or single value
+          if (productData.productType.includes(',')) {
+            productData.productType = productData.productType.split(',').map(t => t.trim()).filter(t => t);
+          } else if (productData.productType.trim()) {
+            productData.productType = [productData.productType.trim()];
+          } else {
+            productData.productType = [];
+          }
+        }
+      } else if (Array.isArray(productData.productType)) {
+        // Already an array, just filter out empty values
+        productData.productType = productData.productType.filter(t => t && t.trim());
+      } else {
+        productData.productType = [];
+      }
+    } else {
+      productData.productType = [];
     }
 
     // Get shop's active subscription to check limits
@@ -357,9 +401,51 @@ exports.updateProduct = async (req, res) => {
     updateData.shippingFees = parseFloat(updateData.shippingFees) || 0;
   }
 
+    // Handle averageRating - validate and convert to number if provided
+    if (updateData.averageRating !== undefined && updateData.averageRating !== '' && updateData.averageRating !== null) {
+      const rating = parseFloat(updateData.averageRating);
+      if (!isNaN(rating) && rating >= 0 && rating <= 5) {
+        updateData.averageRating = rating;
+        // Set totalReviews to 1 if rating is manually set and no reviews exist
+        if (!updateData.totalReviews && (!product || product.totalReviews === 0)) {
+          updateData.totalReviews = 1;
+        }
+      } else {
+        return res.status(400).json({ message: 'Rating must be a number between 0 and 5' });
+      }
+    } else if (updateData.averageRating === '' || updateData.averageRating === null) {
+      // If explicitly set to empty/null, remove it (will use default)
+      delete updateData.averageRating;
+    }
+
     // Convert boolean fields
     if (updateData.isHotOffer !== undefined) {
       updateData.isHotOffer = updateData.isHotOffer === 'true' || updateData.isHotOffer === true;
+    }
+
+    // Handle productType - can be JSON string, array, or comma-separated string
+    if (updateData.productType !== undefined) {
+      if (typeof updateData.productType === 'string') {
+        // Try parsing as JSON first
+        try {
+          const parsed = JSON.parse(updateData.productType);
+          updateData.productType = Array.isArray(parsed) ? parsed : (parsed ? [parsed] : []);
+        } catch {
+          // If not valid JSON, check if it's comma-separated or single value
+          if (updateData.productType.includes(',')) {
+            updateData.productType = updateData.productType.split(',').map(t => t.trim()).filter(t => t);
+          } else if (updateData.productType.trim()) {
+            updateData.productType = [updateData.productType.trim()];
+          } else {
+            updateData.productType = [];
+          }
+        }
+      } else if (Array.isArray(updateData.productType)) {
+        // Already an array, just filter out empty values
+        updateData.productType = updateData.productType.filter(t => t && t.trim());
+      } else {
+        updateData.productType = [];
+      }
     }
 
     if (req.file) {

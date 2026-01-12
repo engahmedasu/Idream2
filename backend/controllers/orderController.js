@@ -50,6 +50,25 @@ exports.logOrder = async (req, res) => {
       })
     );
 
+    // Generate unique numeric order number using Unix timestamp (milliseconds)
+    // If provided from frontend, use it; otherwise generate a new one
+    let orderNumber = req.body.orderNumber || (Date.now() + Math.floor(Math.random() * 1000)).toString();
+    
+    // Ensure uniqueness: if orderNumber already exists, regenerate
+    let attempts = 0;
+    let existingOrder = null;
+    do {
+      existingOrder = await OrderLog.findOne({ orderNumber });
+      if (existingOrder && attempts < 10) {
+        // Regenerate with new timestamp + random component
+        orderNumber = (Date.now() + Math.floor(Math.random() * 10000)).toString();
+        attempts++;
+      } else if (existingOrder) {
+        // Fallback: use timestamp with user ID component to ensure uniqueness
+        orderNumber = Date.now().toString() + user._id.toString().slice(-6).replace(/\D/g, '');
+      }
+    } while (existingOrder && attempts < 10);
+
     const logData = {
       user: user._id,
       userEmail: user.email || userEmail || '',
@@ -57,6 +76,7 @@ exports.logOrder = async (req, res) => {
       shopName: shop.name,
       items: orderItems,
       totalAmount: totalAmount || orderItems.reduce((sum, item) => sum + (item.price + item.shippingFees) * item.quantity, 0),
+      orderNumber: orderNumber,
       channel: 'whatsapp',
       ip: req.ip || req.connection?.remoteAddress || '',
       userAgent: req.headers['user-agent'] || ''
@@ -66,6 +86,54 @@ exports.logOrder = async (req, res) => {
     res.status(201).json(log);
   } catch (error) {
     console.error('Error logging order:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get order summary by order number (for sharing)
+exports.getOrderSummary = async (req, res) => {
+  try {
+    const { orderNumber } = req.params;
+
+    if (!orderNumber) {
+      return res.status(400).json({ message: 'Order number is required' });
+    }
+
+    const order = await OrderLog.findOne({ orderNumber })
+      .populate('user', 'email phone')
+      .populate('shop', 'name email whatsapp')
+      .populate('items.product', 'name image price');
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Format response with all necessary data for the summary page
+    const summary = {
+      orderNumber: order.orderNumber,
+      shopName: order.shop?.name || order.shopName,
+      shopEmail: order.shop?.email || '',
+      shopWhatsApp: order.shop?.whatsapp || '',
+      userEmail: order.user?.email || order.userEmail || '',
+      totalAmount: order.totalAmount,
+      createdAt: order.createdAt,
+      items: order.items.map(item => ({
+        product: item.product ? {
+          _id: item.product._id,
+          name: item.product.name,
+          image: item.product.image
+        } : null,
+        productName: item.product?.name || item.productName || '',
+        productImage: item.product?.image || '',
+        quantity: item.quantity,
+        price: item.price,
+        shippingFees: item.shippingFees || 0
+      }))
+    };
+
+    res.json(summary);
+  } catch (error) {
+    console.error('Error fetching order summary:', error);
     res.status(500).json({ message: error.message });
   }
 };

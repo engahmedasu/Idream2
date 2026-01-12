@@ -2,7 +2,7 @@
   "header": {
     "searchPlaceholder": "ابحث في iDream...",
     "becomePartner": "كن شريكاً",
-    "enterprisePortal": "بوابة المؤسسات",
+    "enterprisePortal": "متجرك",
     "logout": "تسجيل الخروج",
     "arabic": "English"
   },
@@ -95,7 +95,7 @@
   "enterprise": {
     "signIn": "تسجيل الدخول",
     "partnerRegistration": "تسجيل الشريك",
-    "enterprisePortal": "بوابة المؤسسات",
+    "enterprisePortal": "متجرك",
     "authorizedAccess": "الوصول المصرح به فقط",
     "idUsername": "الرقم / اسم المستخدم (الهاتف)",
     "password": "كلمة المرور",
@@ -115,7 +115,7 @@
     "registerPartnerAccount": "تسجيل حساب الشريك",
     "returnToMall": "← العودة إلى المول",
     "accessDenied": "الوصول مرفوض",
-    "accessDeniedMessage": "ليس لديك إذن للوصول إلى بوابة المؤسسات. يمكن للمسؤولين فقط الوصول إلى هذه الصفحة.",
+    "accessDeniedMessage": "ليس لديك إذن للوصول إلى متجرك. يمكن للمسؤولين فقط الوصول إلى هذه الصفحة.",
     "guestAccessDenied": "الوصول مقيد",
     "guestAccessDeniedMessage": "هذه البوابة مقصورة على المسؤولين المصرح لهم فقط. إذا كنت صاحب عمل تبحث عن أن تصبح شريكاً، يرجى استخدام خيار تسجيل الشريك أو الاتصال بمسؤول النظام للحصول على بيانات اعتماد الوصول."
   },

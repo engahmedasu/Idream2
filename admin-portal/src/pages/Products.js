@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiImage, FiX, FiCheckCircle, FiXCircle, FiTag, FiTruck, FiShield } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiImage, FiX, FiCheckCircle, FiXCircle, FiTag, FiTruck, FiShield, FiExternalLink } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
 import getImageUrl from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
+import config from '../config/app';
 import './Products.css';
 
 const Products = () => {
@@ -29,7 +30,7 @@ const Products = () => {
     shop: '',
     category: '',
     priority: 0,
-    productType: '',
+    productType: [],
     isHotOffer: false,
     shippingTitle: '',
     shippingDescription: '',
@@ -37,7 +38,8 @@ const Products = () => {
     warrantyDescription: '',
     imageQualityComment: '',
     isActive: false,
-    isApproved: false
+    isApproved: false,
+    averageRating: ''
   });
   const [availableProductTypes, setAvailableProductTypes] = useState([]);
   const [limitsStatus, setLimitsStatus] = useState({
@@ -135,11 +137,21 @@ const Products = () => {
       // Auto-set shop for shopAdmin users
       const defaultShop = (user && user.role?.name === 'shopAdmin' && user.shop) ? user.shop : '';
       
-      // Load product types if shop is selected
+      // Auto-set category from shop's category for shopAdmin users
+      let defaultCategory = '';
       if (defaultShop) {
         const selectedShop = shops.find(s => s._id === defaultShop);
-        if (selectedShop && selectedShop.productTypes) {
-          setAvailableProductTypes(selectedShop.productTypes);
+        if (selectedShop) {
+          // Set category from shop's category
+          if (selectedShop.category) {
+            defaultCategory = selectedShop.category._id || selectedShop.category;
+          }
+          // Load product types if shop is selected
+          if (selectedShop.productTypes) {
+            setAvailableProductTypes(selectedShop.productTypes);
+          } else {
+            setAvailableProductTypes([]);
+          }
         } else {
           setAvailableProductTypes([]);
         }
@@ -153,9 +165,9 @@ const Products = () => {
         price: '',
         shippingFees: 0,
         shop: defaultShop,
-        category: '',
+        category: defaultCategory,
         priority: 0,
-        productType: '',
+        productType: [],
         isHotOffer: false,
         shippingTitle: '',
         shippingDescription: '',
@@ -163,7 +175,8 @@ const Products = () => {
         warrantyDescription: '',
         imageQualityComment: '',
         isActive: false,
-        isApproved: false
+        isApproved: false,
+        averageRating: ''
       });
       setImageFile(null);
       setImagePreview('');
@@ -186,10 +199,23 @@ const Products = () => {
         setAvailableProductTypes([]);
       }
       // Reset productType when shop changes
-      setFormData(prev => ({ ...prev, productType: '' }));
+      setFormData(prev => ({ ...prev, productType: [] }));
       // Fetch limits status for the selected shop
       fetchLimitsStatus(value);
     }
+  };
+
+  const handleProductTypeChange = (type) => {
+    setFormData(prev => {
+      const currentTypes = prev.productType || [];
+      if (currentTypes.includes(type)) {
+        // Remove type if already selected
+        return { ...prev, productType: currentTypes.filter(t => t !== type) };
+      } else {
+        // Add type if not selected
+        return { ...prev, productType: [...currentTypes, type] };
+      }
+    });
   };
 
   const handleImageChange = (e) => {
@@ -260,7 +286,7 @@ const Products = () => {
       submitData.append('shop', formData.shop);
       submitData.append('category', formData.category);
       submitData.append('priority', String(formData.priority || 0));
-      submitData.append('productType', formData.productType || '');
+      submitData.append('productType', JSON.stringify(formData.productType || []));
       submitData.append('isHotOffer', formData.isHotOffer);
       submitData.append('shippingTitle', formData.shippingTitle || '');
       submitData.append('shippingDescription', formData.shippingDescription || '');
@@ -268,6 +294,11 @@ const Products = () => {
       submitData.append('warrantyDescription', formData.warrantyDescription || '');
       submitData.append('isActive', formData.isActive);
       submitData.append('isApproved', formData.isApproved);
+
+      // Add rating if provided (only for SuperAdmin, MallAdmin, ShopAdmin)
+      if ((isSuperAdmin || isMallAdmin || isShopAdmin) && formData.averageRating !== '' && formData.averageRating !== undefined && formData.averageRating !== null) {
+        submitData.append('averageRating', String(formData.averageRating));
+      }
 
       if (imageFile) {
         submitData.append('productImage', imageFile);
@@ -308,15 +339,23 @@ const Products = () => {
       setAvailableProductTypes([]);
     }
     
+    // For shopAdmin, ensure category matches shop's category (can't be changed)
+    let productCategory = product.category?._id || product.category || '';
+    if (isShopAdmin && selectedShop && selectedShop.category) {
+      const shopCategoryId = selectedShop.category._id || selectedShop.category;
+      // Override with shop's category for shopAdmin
+      productCategory = shopCategoryId;
+    }
+    
     setFormData({
       name: product.name || '',
       description: product.description || '',
       price: product.price || '',
       shippingFees: typeof product.shippingFees === 'number' ? product.shippingFees : 0,
       shop: shopId,
-      category: product.category?._id || product.category || '',
+      category: productCategory,
       priority: product.priority || 0,
-      productType: product.productType || '',
+      productType: Array.isArray(product.productType) ? product.productType : (product.productType ? [product.productType] : []),
       isHotOffer: product.isHotOffer || false,
       shippingTitle: product.shippingTitle || '',
       shippingDescription: product.shippingDescription || '',
@@ -324,7 +363,8 @@ const Products = () => {
       warrantyDescription: product.warrantyDescription || '',
       imageQualityComment: product.imageQualityComment || '',
       isActive: product.isActive || false,
-      isApproved: product.isApproved || false
+      isApproved: product.isApproved || false,
+      averageRating: product.averageRating || ''
     });
     setImagePreview(product.image ? getImageUrl(product.image) : '');
     setImageFile(null);
@@ -379,7 +419,7 @@ const Products = () => {
       shop: '',
       category: '',
       priority: 0,
-      productType: '',
+      productType: [],
       isHotOffer: false,
       shippingTitle: '',
       shippingDescription: '',
@@ -387,7 +427,8 @@ const Products = () => {
       warrantyDescription: '',
       imageQualityComment: '',
       isActive: false,
-      isApproved: false
+      isApproved: false,
+      averageRating: ''
     });
     setAvailableProductTypes([]);
     setImageFile(null);
@@ -485,25 +526,27 @@ const Products = () => {
 
       <div className="table-container">
         <table className="products-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Shop</th>
-              <th>Category</th>
-              <th>Product Type</th>
-              <th>Price</th>
-              <th>Shipping Fees</th>
-              <th>Priority</th>
-              <th>Hot Offer</th>
-              <th>Status</th>
-              <th>Approval</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Shop</th>
+                <th>Category</th>
+                <th>Product Type</th>
+                <th>Price</th>
+                <th>Shipping Fees</th>
+                <th>Priority</th>
+                <th>Hot Offer</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Approval</th>
+                <th>View in Portal</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
           <tbody>
             {filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan="11" className="no-data">No products found</td>
+                <td colSpan="13" className="no-data">No products found</td>
               </tr>
             ) : (
               filteredProducts.map((product) => (
@@ -543,10 +586,20 @@ const Products = () => {
                     </span>
                   </td>
                   <td>
-                    {product.productType ? (
-                      <span className="product-type-badge">
-                        {product.productType}
-                      </span>
+                    {product.productType && (Array.isArray(product.productType) ? product.productType.length > 0 : product.productType) ? (
+                      <div className="product-types-container">
+                        {Array.isArray(product.productType) ? (
+                          product.productType.map((type, index) => (
+                            <span key={index} className="product-type-badge">
+                              {type}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="product-type-badge">
+                            {product.productType}
+                          </span>
+                        )}
+                      </div>
                     ) : (
                       <span className="no-badge">-</span>
                     )}
@@ -576,6 +629,19 @@ const Products = () => {
                     )}
                   </td>
                   <td>
+                    {product.averageRating !== undefined && product.averageRating !== null && product.averageRating > 0 ? (
+                      <div className="rating-display">
+                        <span className="rating-value">{product.averageRating.toFixed(1)}</span>
+                        <span className="rating-stars">⭐</span>
+                        {product.totalReviews > 0 && (
+                          <span className="rating-reviews">({product.totalReviews})</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="no-badge">-</span>
+                    )}
+                  </td>
+                  <td>
                     <span className={`status ${product.isActive ? 'active' : 'inactive'}`}>
                       {product.isActive ? 'Active' : 'Inactive'}
                     </span>
@@ -589,6 +655,21 @@ const Products = () => {
                       <span className="approval-status pending">
                         <FiXCircle /> Pending
                       </span>
+                    )}
+                  </td>
+                  <td>
+                    {product._id ? (
+                      <a
+                        href={`${config.frontendPortalURL}/product/${product._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="external-link"
+                        title="View product in frontend portal"
+                      >
+                        <FiExternalLink /> View
+                      </a>
+                    ) : (
+                      <span className="no-badge">-</span>
                     )}
                   </td>
                   <td>
@@ -710,33 +791,45 @@ const Products = () => {
                 </div>
                 <div className="form-group">
                   <label>Category *</label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map(cat => (
-                      <option key={cat._id} value={cat._id}>{cat.name}</option>
-                    ))}
-                  </select>
+                  {isShopAdmin ? (
+                    <input
+                      type="text"
+                      value={formData.category ? (categories.find(c => c._id === formData.category)?.name || 'Loading...') : 'Please select a shop'}
+                      readOnly
+                      disabled
+                      style={{ background: '#f3f4f6', cursor: 'not-allowed' }}
+                    />
+                  ) : (
+                    <select
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map(cat => (
+                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
 
               {availableProductTypes.length > 0 && (
                 <div className="form-group">
-                  <label>Product Type</label>
-                  <select
-                    name="productType"
-                    value={formData.productType}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select a product type (optional)</option>
+                  <label>Product Type (Select Multiple)</label>
+                  <div className="checkbox-group">
                     {availableProductTypes.map((type, index) => (
-                      <option key={index} value={type}>{type}</option>
+                      <label key={index} className="checkbox-label">
+                        <input
+                          type="checkbox"
+                          checked={formData.productType?.includes(type) || false}
+                          onChange={() => handleProductTypeChange(type)}
+                        />
+                        <span>{type}</span>
+                      </label>
                     ))}
-                  </select>
+                  </div>
                   <small className="form-hint">Filter products by type on the shop page</small>
                 </div>
               )}
@@ -784,6 +877,29 @@ const Products = () => {
                   </div>
                 )}
               </div>
+
+              {(isSuperAdmin || isMallAdmin || isShopAdmin) && (
+                <div className="form-group">
+                  <label>Rating (Optional)</label>
+                  <input
+                    type="number"
+                    name="averageRating"
+                    value={formData.averageRating}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Allow empty, or validate range 0-5
+                      if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 5)) {
+                        handleInputChange(e);
+                      }
+                    }}
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    placeholder="0.0 - 5.0"
+                  />
+                  <small className="form-hint">Enter a rating between 0.0 and 5.0 (leave empty for default: 2.5 if no reviews exist)</small>
+                </div>
+              )}
 
               <div className="form-group">
                 <label>Product Image *</label>

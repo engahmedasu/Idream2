@@ -92,6 +92,23 @@ exports.register = async (req, res) => {
 };
 
 // Register partner (creates user with shopAdmin role and shop)
+// Helper function to validate Egyptian phone number format (+20XXXXXXXXXX)
+const validateEgyptianPhone = (phone) => {
+  if (!phone || typeof phone !== 'string') {
+    return { valid: false, message: 'Phone number is required' };
+  }
+  const trimmedPhone = phone.trim();
+  if (!trimmedPhone.startsWith('+20')) {
+    return { valid: false, message: 'Phone number must start with +20 (Egypt international format)' };
+  }
+  // Check if it's a valid Egyptian phone number: +20 followed by 10 digits
+  const phoneDigits = trimmedPhone.replace(/\D/g, ''); // Remove all non-digits
+  if (phoneDigits.length !== 12 || !phoneDigits.startsWith('20')) {
+    return { valid: false, message: 'Phone number must be in format: +20XXXXXXXXXX (12 digits including country code)' };
+  }
+  return { valid: true, message: '' };
+};
+
 exports.registerPartner = async (req, res) => {
   try {
     const { name, email, phone, password, address, whatsapp, categoryId, subscriptionPlanId, billingCycleId } = req.body;
@@ -109,6 +126,21 @@ exports.registerPartner = async (req, res) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Please enter a valid email address' });
+    }
+
+    // Validate phone number format
+    const phoneValidation = validateEgyptianPhone(phone);
+    if (!phoneValidation.valid) {
+      return res.status(400).json({ message: `Phone: ${phoneValidation.message}` });
+    }
+
+    // Validate WhatsApp number format if provided
+    const finalWhatsApp = whatsapp || phone;
+    if (finalWhatsApp) {
+      const whatsappValidation = validateEgyptianPhone(finalWhatsApp);
+      if (!whatsappValidation.valid) {
+        return res.status(400).json({ message: `WhatsApp: ${whatsappValidation.message}` });
+      }
     }
 
     // Check if user already exists

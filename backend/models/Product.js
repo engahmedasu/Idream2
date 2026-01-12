@@ -68,8 +68,8 @@ const productSchema = new mongoose.Schema({
     required: true
   },
   productType: {
-    type: String,
-    default: ''
+    type: [String],
+    default: []
   },
   isActive: {
     type: Boolean,

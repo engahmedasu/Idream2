@@ -62,11 +62,7 @@ const Header = ({ onCartClick }) => {
       <header className="header">
         <div className="header-container">
           <Link to="/" className="logo">
-            <div className="logo-icon">▶</div>
-            <div className="logo-text">
-              <span className="logo-main">iDream</span>
-              <span className="logo-sub">EGYPT</span>
-            </div>
+            <img src="/logo.svg" alt="iDREAM" className="logo-image" />
           </Link>
 
           <form className="search-bar" onSubmit={handleSearch}>

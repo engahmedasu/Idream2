@@ -76,27 +76,46 @@
   margin: 0;
 }
 
+.footer-company-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.footer-company-link:hover {
+  color: #5568d3;
+  text-decoration: underline;
+}
+
 .footer-links {
   display: flex;
   gap: 1.5rem;
 }
 
 .footer-links a,
-.footer-links .footer-link {
+.footer-links .footer-link,
+.footer-links button.footer-link {
   color: #6b7280;
   font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.2s;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
 }
 
 .footer-links a:hover,
-.footer-links .footer-link:hover {
+.footer-links .footer-link:hover,
+.footer-links button.footer-link:hover {
   color: #1f2937;
 }
 
 .footer-links a:visited,
-.footer-links .footer-link:visited {
+.footer-links .footer-link:visited,
+.footer-links button.footer-link:visited {
   color: #6b7280;
 }
 

@@ -26,8 +26,10 @@ const Videos = () => {
     videoUrl: '',
     thumbnailUrl: '',
     priority: 0,
-    isActive: true
+    isActive: true,
+    categories: []
   });
+  const [categories, setCategories] = useState([]);
 
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
@@ -61,9 +63,19 @@ const Videos = () => {
     }
   }, [filterStatus]);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await api.get('/categories?isActive=true');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchVideos();
-  }, [fetchVideos]);
+    fetchCategories();
+  }, [fetchVideos, fetchCategories]);
 
   // Reset form when opening create modal
   useEffect(() => {
@@ -74,7 +86,8 @@ const Videos = () => {
         videoUrl: '',
         thumbnailUrl: '',
         priority: videos.length,
-        isActive: true
+        isActive: true,
+        categories: []
       });
       setVideoFile(null);
       setThumbnailFile(null);
@@ -89,6 +102,34 @@ const Videos = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : (type === 'number' ? parseInt(value) || 0 : value)
     }));
+  };
+
+  const handleCategoryToggle = (categoryId) => {
+    setFormData(prev => {
+      const currentCategories = prev.categories || [];
+      const isSelected = currentCategories.includes(categoryId);
+      
+      return {
+        ...prev,
+        categories: isSelected
+          ? currentCategories.filter(id => id !== categoryId)
+          : [...currentCategories, categoryId]
+      };
+    });
+  };
+
+  const handleSelectAllCategories = () => {
+    if (categories.length === 0) return;
+    
+    setFormData(prev => {
+      const currentCategories = prev.categories || [];
+      const allSelected = categories.every(cat => currentCategories.includes(cat._id));
+      
+      return {
+        ...prev,
+        categories: allSelected ? [] : categories.map(cat => cat._id)
+      };
+    });
   };
 
   const handleVideoChange = (e) => {
@@ -135,6 +176,12 @@ const Videos = () => {
       submitData.append('description', formData.description || '');
       submitData.append('priority', formData.priority);
       submitData.append('isActive', formData.isActive);
+      
+      // Append categories as array (FormData handles arrays differently)
+      if (formData.categories && formData.categories.length > 0) {
+        // Send as comma-separated string or array - backend will parse it
+        submitData.append('categories', JSON.stringify(formData.categories));
+      }
 
       // If no video file but videoUrl is provided, use videoUrl
       if (videoFile) {
@@ -179,7 +226,8 @@ const Videos = () => {
       videoUrl: video.videoUrl || '',
       thumbnailUrl: video.thumbnailUrl || '',
       priority: video.priority || 0,
-      isActive: video.isActive
+      isActive: video.isActive,
+      categories: video.categories ? video.categories.map(cat => typeof cat === 'object' ? cat._id : cat) : []
     });
     setVideoPreview(video.videoUrl ? getImageUrl(video.videoUrl) : '');
     setThumbnailPreview(video.thumbnailUrl ? getImageUrl(video.thumbnailUrl) : '');
@@ -257,7 +305,8 @@ const Videos = () => {
       videoUrl: '',
       thumbnailUrl: '',
       priority: 0,
-      isActive: true
+      isActive: true,
+      categories: []
     });
     setVideoFile(null);
     setThumbnailFile(null);
@@ -346,6 +395,7 @@ const Videos = () => {
               <th style={{ width: '80px' }}>Priority</th>
               <th>Title</th>
               <th>Description</th>
+              <th>Categories</th>
               <th>Thumbnail</th>
               <th>Status</th>
               <th>Actions</th>
@@ -354,7 +404,7 @@ const Videos = () => {
           <tbody>
             {filteredVideos.length === 0 ? (
               <tr>
-                <td colSpan="6" className="no-data">No videos found</td>
+                <td colSpan="7" className="no-data">No videos found</td>
               </tr>
             ) : (
               filteredVideos.map((video, index) => (
@@ -387,6 +437,25 @@ const Videos = () => {
                     <div className="video-description">
                       {video.description || '-'}
                     </div>
+                  </td>
+                  <td>
+                    {video.categories && video.categories.length > 0 ? (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                        {video.categories.map((cat, idx) => (
+                          <span key={idx} style={{ 
+                            background: '#e0e7ff', 
+                            color: '#4338ca', 
+                            padding: '0.25rem 0.5rem', 
+                            borderRadius: '4px', 
+                            fontSize: '0.75rem' 
+                          }}>
+                            {typeof cat === 'object' ? cat.name : cat}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span style={{ color: '#9ca3af' }}>No categories</span>
+                    )}
                   </td>
                   <td>
                     {video.thumbnailUrl ? (
@@ -475,6 +544,57 @@ const Videos = () => {
                   min="0"
                 />
                 <small className="form-hint">Higher numbers appear first in the frontend</small>
+              </div>
+              <div className="form-group">
+                <div className="categories-section">
+                  <div className="categories-header">
+                    <label>Categories</label>
+                    <button
+                      type="button"
+                      className="btn-select-all"
+                      onClick={handleSelectAllCategories}
+                    >
+                      {categories.length > 0 && formData.categories?.length === categories.length
+                        ? 'Deselect All'
+                        : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="categories-container">
+                    {categories.length === 0 ? (
+                      <div className="categories-empty">
+                        <p>No categories available. Please create categories first.</p>
+                      </div>
+                    ) : (
+                      categories.map(category => {
+                        const isSelected = formData.categories?.includes(category._id) || false;
+                        return (
+                          <div
+                            key={category._id}
+                            className={`category-item ${isSelected ? 'selected' : ''}`}
+                            onClick={() => handleCategoryToggle(category._id)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleCategoryToggle(category._id)}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <span className="category-name">{category.name}</span>
+                            {category.description && (
+                              <span className="category-description">{category.description}</span>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  {formData.categories && formData.categories.length > 0 && (
+                    <div className="selected-count">
+                      {formData.categories.length} categor{formData.categories.length === 1 ? 'y' : 'ies'} selected
+                    </div>
+                  )}
+                </div>
+                <small className="form-hint">Select one or more categories for this video</small>
               </div>
               <div className="form-group">
                 <label>Video File or URL *</label>

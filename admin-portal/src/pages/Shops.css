@@ -308,6 +308,28 @@
   color: #92400E;
 }
 
+.external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4F46E5;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.external-link:hover {
+  background: #EEF2FF;
+  color: #4338CA;
+}
+
+.external-link svg {
+  font-size: 1rem;
+}
+
 .pending-shop-row {
   background-color: #fef2f2;
 }

@@ -305,6 +305,7 @@ exports.generateOrderReport = async (req, res) => {
       logs.forEach(log => {
         log.items.forEach((item, index) => {
           data.push({
+            'Order Number': log.orderNumber || log._id.toString().slice(-8).toUpperCase(),
             'Order Date': log.createdAt,
             'Order Time': new Date(log.createdAt).toLocaleTimeString(),
             'User Email': log.user?.email || log.userEmail || '',

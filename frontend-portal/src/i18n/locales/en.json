@@ -2,7 +2,7 @@
   "header": {
     "searchPlaceholder": "Search in iDream...",
     "becomePartner": "Become a Partner",
-    "enterprisePortal": "Enterprise Portal",
+    "enterprisePortal": "Your Shop",
     "logout": "Logout",
     "arabic": "عربي"
   },
@@ -95,7 +95,7 @@
   "enterprise": {
     "signIn": "Sign In",
     "partnerRegistration": "Partner Registration",
-    "enterprisePortal": "Enterprise Portal",
+    "enterprisePortal": "Your Shop",
     "authorizedAccess": "Authorized Access Only",
     "idUsername": "ID / Username (Phone)",
     "password": "Password",
@@ -115,7 +115,7 @@
     "registerPartnerAccount": "Register Partner Account",
     "returnToMall": "← Return to Mall",
     "accessDenied": "Access Denied",
-    "accessDeniedMessage": "You do not have permission to access the Enterprise Portal. Only administrators can access this page.",
+    "accessDeniedMessage": "You do not have permission to access Your Shop. Only administrators can access this page.",
     "guestAccessDenied": "Access Restricted",
     "guestAccessDeniedMessage": "This portal is restricted to authorized administrators only. If you are a business owner looking to become a partner, please use the Partner Registration option or contact your system administrator for access credentials."
   },

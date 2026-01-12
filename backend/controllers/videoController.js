@@ -3,15 +3,21 @@ const Video = require('../models/Video');
 // Get all videos
 exports.getAllVideos = async (req, res) => {
   try {
-    const { isActive } = req.query;
+    const { isActive, category } = req.query;
     const filter = {};
 
     if (isActive !== undefined) filter.isActive = isActive === 'true';
+    
+    // Filter by category if provided (videos that have this category in their categories array)
+    if (category) {
+      filter.categories = { $in: [category] };
+    }
 
     // For public access, only return active videos sorted by priority
     const videos = await Video.find(filter)
       .populate('createdBy', 'email')
       .populate('updatedBy', 'email')
+      .populate('categories', 'name')
       .sort({ priority: -1, createdAt: -1 });
 
     res.json(videos);
@@ -25,7 +31,8 @@ exports.getVideoById = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id)
       .populate('createdBy', 'email')
-      .populate('updatedBy', 'email');
+      .populate('updatedBy', 'email')
+      .populate('categories', 'name');
 
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });
@@ -44,6 +51,28 @@ exports.createVideo = async (req, res) => {
     const maxPriorityVideo = await Video.findOne().sort({ priority: -1 });
     const nextPriority = maxPriorityVideo ? maxPriorityVideo.priority + 1 : 0;
 
+    // Parse categories from request body (can be array, JSON string, or comma-separated string)
+    let categories = [];
+    if (req.body.categories) {
+      if (Array.isArray(req.body.categories)) {
+        categories = req.body.categories;
+      } else if (typeof req.body.categories === 'string') {
+        try {
+          // Try parsing as JSON first
+          const parsed = JSON.parse(req.body.categories);
+          if (Array.isArray(parsed)) {
+            categories = parsed;
+          } else {
+            // Fallback to comma-separated
+            categories = req.body.categories.split(',').map(id => id.trim()).filter(Boolean);
+          }
+        } catch {
+          // Not JSON, treat as comma-separated string
+          categories = req.body.categories.split(',').map(id => id.trim()).filter(Boolean);
+        }
+      }
+    }
+
     const videoData = {
       title: req.body.title,
       description: req.body.description || '',
@@ -51,6 +80,7 @@ exports.createVideo = async (req, res) => {
       thumbnailUrl: req.files?.thumbnail ? `/uploads/videos/thumbnails/${req.files.thumbnail[0].filename}` : req.body.thumbnailUrl || '',
       priority: req.body.priority !== undefined ? parseInt(req.body.priority) : nextPriority,
       isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : true,
+      categories: categories,
       createdBy: req.user._id
     };
 
@@ -59,7 +89,9 @@ exports.createVideo = async (req, res) => {
     }
 
     const video = await Video.create(videoData);
-    res.status(201).json(video);
+    const populatedVideo = await Video.findById(video._id)
+      .populate('categories', 'name');
+    res.status(201).json(populatedVideo);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -75,6 +107,29 @@ exports.updateVideo = async (req, res) => {
       isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : undefined,
       updatedBy: req.user._id
     };
+
+    // Parse categories from request body (can be array, JSON string, or comma-separated string)
+    if (req.body.categories !== undefined) {
+      let categories = [];
+      if (Array.isArray(req.body.categories)) {
+        categories = req.body.categories;
+      } else if (typeof req.body.categories === 'string') {
+        try {
+          // Try parsing as JSON first
+          const parsed = JSON.parse(req.body.categories);
+          if (Array.isArray(parsed)) {
+            categories = parsed;
+          } else {
+            // Fallback to comma-separated
+            categories = req.body.categories.split(',').map(id => id.trim()).filter(Boolean);
+          }
+        } catch {
+          // Not JSON, treat as comma-separated string
+          categories = req.body.categories.split(',').map(id => id.trim()).filter(Boolean);
+        }
+      }
+      updateData.categories = categories;
+    }
 
     if (req.files?.video) {
       updateData.videoUrl = `/uploads/videos/${req.files.video[0].filename}`;
@@ -95,7 +150,8 @@ exports.updateVideo = async (req, res) => {
       req.params.id,
       updateData,
       { new: true, runValidators: true }
-    );
+    )
+      .populate('categories', 'name');
 
     if (!video) {
       return res.status(404).json({ message: 'Video not found' });

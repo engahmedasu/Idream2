@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import ShopCard from '../components/ShopCard';
 import ProductCard from '../components/ProductCard';
 import VideoBanner from '../components/VideoBanner';
+import Advertisement from '../components/Advertisement';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -222,9 +223,13 @@ const Home = () => {
 
   return (
     <div className="home">
-      <div className="home-container">
+      <div className="home-wrapper">
+        {/* Left Advertisement */}
+        <Advertisement categoryId={firstCategory?._id} side="left" />
+        
+        <div className="home-container">
         {/* Video Banner Section */}
-        {!searchQuery && <VideoBanner />}
+        {!searchQuery && <VideoBanner categoryId={firstCategory?._id} />}
 
         {/* Welcome Section */}
         {!searchQuery && firstCategory && (
@@ -440,6 +445,10 @@ const Home = () => {
             )}
           </section>
         )}
+        </div>
+        
+        {/* Right Advertisement */}
+        <Advertisement categoryId={firstCategory?._id} side="right" />
       </div>
     </div>
   );

@@ -30,6 +30,9 @@ const config = {
   // Image Base URL (for serving uploaded images)
   imageBaseURL: process.env.REACT_APP_IMAGE_BASE_URL || (isProduction ? 'https://api.idreamegypt.com' : 'http://localhost:5000'),
 
+  // Frontend Portal URL
+  frontendPortalURL: process.env.REACT_APP_FRONTEND_PORTAL_URL || (isProduction ? 'https://idreamegypt.com' : 'http://localhost:3000'),
+
   // Application Settings
   app: {
     name: 'iDream Admin Portal',

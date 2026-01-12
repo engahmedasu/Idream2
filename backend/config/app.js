@@ -52,10 +52,7 @@ const config = {
   // Database Configuration
   database: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/idream',
-    options: {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
+    options: {}, // Options removed - Mongoose v6+ handles these automatically
   },
 
   // JWT Configuration

@@ -3,10 +3,20 @@
   min-height: calc(100vh - 200px);
 }
 
+.category-page-wrapper {
+  display: flex;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
 .category-page-container {
+  flex: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 2rem;
 }
 
 .welcome-banner {

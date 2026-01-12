@@ -446,6 +446,119 @@
   width: auto;
 }
 
+/* Categories Section Styles */
+.categories-section {
+  margin-bottom: 1.5rem;
+}
+
+.categories-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.categories-header label {
+  margin: 0;
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.875rem;
+}
+
+.btn-select-all {
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-select-all:hover {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.categories-container {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #f9fafb;
+}
+
+.categories-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0.5rem;
+}
+
+.category-item:last-child {
+  margin-bottom: 0;
+}
+
+.category-item:hover {
+  background: #f9fafb;
+  border-color: #4F46E5;
+}
+
+.category-item.selected {
+  background: #EEF2FF;
+  border-color: #4F46E5;
+}
+
+.category-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #4F46E5;
+  flex-shrink: 0;
+}
+
+.category-name {
+  flex: 1;
+  font-size: 0.875rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.category-description {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
+  margin-left: auto;
+}
+
+.selected-count {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #EEF2FF;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #4F46E5;
+  font-weight: 500;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;

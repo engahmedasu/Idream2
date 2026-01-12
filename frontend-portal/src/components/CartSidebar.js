@@ -45,19 +45,10 @@ const CartSidebar = ({ isOpen, onClose }) => {
       return;
     }
 
-    const itemsText = shopGroup.items
-      .map((item) => {
-        const price = item.product.price || 0;
-        const shipping = item.product.shippingFees || 0;
-        const lineTotal = (price + shipping) * item.quantity;
-        return `${item.product.name} x${item.quantity} - EGP ${lineTotal}`;
-      })
-      .join('\n');
-
-    const message = `Hello! I would like to place an order from ${shopGroup.shopName}:\n\n${itemsText}\n\nTotal: EGP ${shopGroup.total}`;
-    const whatsappUrl = `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-
-    // Log the order (fire-and-forget)
+    // Generate unique numeric order number using Unix timestamp (milliseconds)
+    // Add a small random component to ensure uniqueness even if two orders happen at the same millisecond
+    const orderNumber = (Date.now() + Math.floor(Math.random() * 1000)).toString();
+    
     try {
       const orderItems = shopGroup.items.map((item) => ({
         productId: item.product._id,
@@ -67,16 +58,42 @@ const CartSidebar = ({ isOpen, onClose }) => {
         shippingFees: item.product.shippingFees || 0
       }));
 
-      await api.post('/orders/log', {
+      // Log the order (fire-and-forget, don't wait for response)
+      api.post('/orders/log', {
         shopId: shopGroup.shopId,
         items: orderItems,
-        totalAmount: shopGroup.total
+        totalAmount: shopGroup.total,
+        orderNumber: orderNumber // Include order number in the log
+      }).catch(err => {
+        console.error('Failed to log order', err);
+        // Don't block the user from opening WhatsApp if logging fails
       });
     } catch (err) {
-      console.error('Failed to log order', err);
-      // Don't block the user from opening WhatsApp if logging fails
+      console.error('Error preparing order log', err);
+      // Continue with order number even if logging fails
     }
 
+    // Format order details
+    const orderDetails = shopGroup.items
+      .map((item) => {
+        const price = item.product.price || 0;
+        const shipping = item.product.shippingFees || 0;
+        const lineTotal = (price + shipping) * item.quantity;
+        return `* ${item.product.name} ×${item.quantity} – ${lineTotal.toFixed(2)}`;
+      })
+      .join('\n');
+
+    // Format message according to requirements (without emojis to avoid encoding issues)
+    const message = `Thank you for your order with iDream Mall
+Store: ${shopGroup.shopName}
+Your order number is # ${orderNumber}
+Order details:
+${orderDetails}
+Total: ${shopGroup.total.toFixed(2)}
+If you need any assistance, feel free to contact us.
+Thank you for choosing ${shopGroup.shopName} at iDream Mall`;
+
+    const whatsappUrl = `https://wa.me/${shopWhatsApp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

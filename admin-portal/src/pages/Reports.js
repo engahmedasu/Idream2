@@ -310,6 +310,7 @@ const Reports = ({ reportType: propReportType }) => {
           <table className="reports-table">
             <thead>
               <tr>
+                <th>Order Number</th>
                 <th>Order Date</th>
                 <th>Order Time</th>
                 <th>User Email</th>
@@ -331,6 +332,9 @@ const Reports = ({ reportType: propReportType }) => {
                   <tr key={`${log._id}-${index}`}>
                     {index === 0 && (
                       <>
+                        <td rowSpan={log.items.length}>
+                          {log.orderNumber || log._id.toString().slice(-8).toUpperCase()}
+                        </td>
                         <td rowSpan={log.items.length}>
                           {log.createdAt ? new Date(log.createdAt).toLocaleDateString() : '-'}
                         </td>

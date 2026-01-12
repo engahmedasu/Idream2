@@ -4,6 +4,23 @@ const Category = require('../models/Category');
 const Product = require('../models/Product');
 const { attachRatingsToProducts } = require('./productController');
 
+// Helper function to validate Egyptian phone number format (+20XXXXXXXXXX)
+const validateEgyptianPhone = (phone) => {
+  if (!phone || typeof phone !== 'string') {
+    return { valid: false, message: 'Phone number is required' };
+  }
+  const trimmedPhone = phone.trim();
+  if (!trimmedPhone.startsWith('+20')) {
+    return { valid: false, message: 'Phone number must start with +20 (Egypt international format)' };
+  }
+  // Check if it's a valid Egyptian phone number: +20 followed by 10 digits
+  const phoneDigits = trimmedPhone.replace(/\D/g, ''); // Remove all non-digits
+  if (phoneDigits.length !== 12 || !phoneDigits.startsWith('20')) {
+    return { valid: false, message: 'Phone number must be in format: +20XXXXXXXXXX (12 digits including country code)' };
+  }
+  return { valid: true, message: '' };
+};
+
 // Get all shops
 exports.getAllShops = async (req, res) => {
   try {
@@ -95,6 +112,22 @@ exports.getShopByShareLink = async (req, res) => {
 // Create shop (registration)
 exports.createShop = async (req, res) => {
   try {
+    // Validate mobile number
+    if (req.body.mobile) {
+      const mobileValidation = validateEgyptianPhone(req.body.mobile);
+      if (!mobileValidation.valid) {
+        return res.status(400).json({ message: `Mobile: ${mobileValidation.message}` });
+      }
+    }
+
+    // Validate WhatsApp number
+    if (req.body.whatsapp) {
+      const whatsappValidation = validateEgyptianPhone(req.body.whatsapp);
+      if (!whatsappValidation.valid) {
+        return res.status(400).json({ message: `WhatsApp: ${whatsappValidation.message}` });
+      }
+    }
+
     const shopData = {
       ...req.body,
       image: req.file ? `/uploads/shops/${req.file.filename}` : '',
@@ -147,6 +180,22 @@ exports.updateShop = async (req, res) => {
         if (existingShop.createdBy.toString() !== req.user._id.toString()) {
           return res.status(403).json({ message: 'Access denied. You can only update shops you created.' });
         }
+      }
+    }
+
+    // Validate mobile number if provided
+    if (req.body.mobile !== undefined) {
+      const mobileValidation = validateEgyptianPhone(req.body.mobile);
+      if (!mobileValidation.valid) {
+        return res.status(400).json({ message: `Mobile: ${mobileValidation.message}` });
+      }
+    }
+
+    // Validate WhatsApp number if provided
+    if (req.body.whatsapp !== undefined) {
+      const whatsappValidation = validateEgyptianPhone(req.body.whatsapp);
+      if (!whatsappValidation.valid) {
+        return res.status(400).json({ message: `WhatsApp: ${whatsappValidation.message}` });
       }
     }
 

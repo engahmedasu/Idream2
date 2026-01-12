@@ -199,6 +199,22 @@ const EnterprisePortal = () => {
     }
   };
 
+  const validateEgyptianPhone = (phone) => {
+    if (!phone || !phone.trim()) {
+      return { valid: false, message: 'Phone number is required' };
+    }
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone.startsWith('+20')) {
+      return { valid: false, message: 'Phone number must start with +20 (Egypt international format)' };
+    }
+    // Check if it's a valid Egyptian phone number: +20 followed by 10 digits
+    const phoneDigits = trimmedPhone.replace(/\D/g, ''); // Remove all non-digits
+    if (phoneDigits.length !== 12 || !phoneDigits.startsWith('20')) {
+      return { valid: false, message: 'Phone number must be in format: +20XXXXXXXXXX (12 digits including country code)' };
+    }
+    return { valid: true, message: '' };
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -208,6 +224,24 @@ const EnterprisePortal = () => {
       toast.error('Please select a subscription plan and billing cycle');
       setLoading(false);
       return;
+    }
+
+    // Validate phone number format
+    const phoneValidation = validateEgyptianPhone(registerData.phone);
+    if (!phoneValidation.valid) {
+      toast.error(`Phone: ${phoneValidation.message}`);
+      setLoading(false);
+      return;
+    }
+
+    // Validate WhatsApp number format if provided
+    if (registerData.whatsapp && registerData.whatsapp.trim()) {
+      const whatsappValidation = validateEgyptianPhone(registerData.whatsapp);
+      if (!whatsappValidation.valid) {
+        toast.error(`WhatsApp: ${whatsappValidation.message}`);
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -277,7 +311,7 @@ const EnterprisePortal = () => {
           <div className="access-denied-message">
             <FiAlertCircle className="access-denied-icon" />
             <h2>{t('enterprise.accessDenied') || 'Access Denied'}</h2>
-            <p>{t('enterprise.accessDeniedMessage') || 'You do not have permission to access the Enterprise Portal. Only administrators can access this page.'}</p>
+            <p>{t('enterprise.accessDeniedMessage') || 'You do not have permission to access Your Shop. Only administrators can access this page.'}</p>
             <Link to="/" className="btn-return-home">
               {t('enterprise.returnToMall') || '← Return to Mall'}
             </Link>
@@ -315,7 +349,7 @@ const EnterprisePortal = () => {
 
         {activeTab === 'login' ? (
           <>
-            <h1 className="enterprise-title">{t('enterprise.enterprisePortal') || 'Enterprise Portal'}</h1>
+            <h1 className="enterprise-title">{t('enterprise.enterprisePortal') || 'Your Shop'}</h1>
             <p className="enterprise-subtitle">{t('enterprise.authorizedAccess') || 'Authorized Access Only'}</p>
 
             <form onSubmit={handleLogin} className="enterprise-form">
@@ -405,10 +439,15 @@ const EnterprisePortal = () => {
                     name="phone"
                     value={registerData.phone}
                     onChange={handleRegisterChange}
-                    placeholder="01xxxxxxxxx"
+                    placeholder="+20XXXXXXXXXX"
+                    pattern="\+20[0-9]{10}"
+                    title="Must start with +20 followed by 10 digits"
                     required
                   />
                 </div>
+                <small style={{ color: '#6b7280', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
+                  Format: +20XXXXXXXXXX (Egypt international format)
+                </small>
               </div>
 
               <div className="form-group">
@@ -451,11 +490,13 @@ const EnterprisePortal = () => {
                     name="whatsapp"
                     value={registerData.whatsapp}
                     onChange={handleRegisterChange}
-                    placeholder={t('enterprise.whatsappPlaceholder') || '01xxxxxxxxx (optional)'}
+                    placeholder="+20XXXXXXXXXX (optional)"
+                    pattern="\+20[0-9]{10}"
+                    title="Must start with +20 followed by 10 digits"
                   />
                 </div>
                 <small style={{ color: '#6b7280', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>
-                  {t('enterprise.whatsappHint') || 'If not provided, phone number will be used'}
+                  {t('enterprise.whatsappHint') || 'If not provided, phone number will be used. Format: +20XXXXXXXXXX'}
                 </small>
               </div>
 

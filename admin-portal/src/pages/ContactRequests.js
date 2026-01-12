@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FiMail, FiSearch, FiEye, FiTrash2, FiCheck, FiX, FiFilter } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FiMail, FiSearch, FiEye, FiTrash2, FiX, FiFilter } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
 import './ContactRequests.css';
@@ -26,12 +26,7 @@ const ContactRequests = () => {
     archived: 0
   });
 
-  useEffect(() => {
-    fetchRequests();
-    fetchStats();
-  }, [pagination.page, statusFilter, readFilter, searchTerm]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
       const params = {
@@ -60,16 +55,21 @@ const ContactRequests = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, statusFilter, readFilter, searchTerm]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await api.get('/contact/stats');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchRequests();
+    fetchStats();
+  }, [fetchRequests, fetchStats]);
 
   const handleView = async (id) => {
     try {

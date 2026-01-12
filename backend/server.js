@@ -79,6 +79,8 @@ app.use('/api/billingcycles', checkDBConnection, require('./routes/billingCycles
 app.use('/api/videos', checkDBConnection, require('./routes/videos'));
 app.use('/api/pages', checkDBConnection, require('./routes/pages'));
 app.use('/api/contact', checkDBConnection, require('./routes/contact'));
+app.use('/api/requests', checkDBConnection, require('./routes/requests'));
+app.use('/api/advertisements', checkDBConnection, require('./routes/advertisements'));
 app.use('/api/ai', checkDBConnection, require('./routes/ai'));
 
 // Swagger Documentation

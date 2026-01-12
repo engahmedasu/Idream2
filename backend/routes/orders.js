@@ -51,5 +51,28 @@ const { auth } = require('../middleware/auth');
  */
 router.post('/log', auth, orderController.logOrder);
 
+/**
+ * @swagger
+ * /orders/summary/{orderNumber}:
+ *   get:
+ *     summary: Get order summary by order number (public endpoint for sharing)
+ *     tags: [Orders]
+ *     parameters:
+ *       - in: path
+ *         name: orderNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order number
+ *     responses:
+ *       200:
+ *         description: Order summary retrieved successfully
+ *       404:
+ *         description: Order not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/summary/:orderNumber', orderController.getOrderSummary);
+
 module.exports = router;
 

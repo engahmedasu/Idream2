@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import ShopCard from '../components/ShopCard';
 import ProductCard from '../components/ProductCard';
 import VideoBanner from '../components/VideoBanner';
+import Advertisement from '../components/Advertisement';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -208,9 +209,13 @@ const CategoryPage = () => {
 
   return (
     <div className="category-page">
-      <div className="category-page-container">
-        {/* Video Banner Section */}
-        <VideoBanner />
+      <div className="category-page-wrapper">
+        {/* Left Advertisement */}
+        <Advertisement categoryId={id} side="left" />
+        
+        <div className="category-page-container">
+          {/* Video Banner Section */}
+          <VideoBanner categoryId={id} />
 
         {/* Category Header Section */}
         <section className="welcome-banner">
@@ -378,6 +383,10 @@ const CategoryPage = () => {
             </div>
           </section>
         )}
+        </div>
+        
+        {/* Right Advertisement */}
+        <Advertisement categoryId={id} side="right" />
       </div>
     </div>
   );

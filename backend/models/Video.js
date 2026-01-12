@@ -27,6 +27,10 @@ const videoSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  categories: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category'
+  }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

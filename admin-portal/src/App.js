@@ -10,12 +10,16 @@ import Shops from './pages/Shops';
 import Products from './pages/Products';
 import Categories from './pages/Categories';
 import Videos from './pages/Videos';
+import Advertisements from './pages/Advertisements';
 import Roles from './pages/Roles';
 import Permissions from './pages/Permissions';
 import Reports from './pages/Reports';
 import SubscriptionPlans from './pages/SubscriptionPlans';
 import Pages from './pages/Pages';
 import ContactRequests from './pages/ContactRequests';
+import JoinOurTeam from './pages/JoinOurTeam';
+import NewIdeas from './pages/NewIdeas';
+import HireExpert from './pages/HireExpert';
 import Layout from './components/Layout';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
@@ -106,6 +110,14 @@ function AppRoutes() {
           } 
         />
         <Route 
+          path="advertisements" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <Advertisements />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
           path="roles" 
           element={
             <RoleProtectedRoute allowedRoles={['superAdmin']}>
@@ -153,6 +165,30 @@ function AppRoutes() {
           element={
             <RoleProtectedRoute allowedRoles={['superAdmin']}>
               <ContactRequests />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="requests/join-our-team" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <JoinOurTeam />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="requests/new-ideas" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <NewIdeas />
+            </RoleProtectedRoute>
+          } 
+        />
+        <Route 
+          path="requests/hire-expert" 
+          element={
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
+              <HireExpert />
             </RoleProtectedRoute>
           } 
         />

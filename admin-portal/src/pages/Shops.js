@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiEdit, FiTrash2, FiSearch, FiImage, FiX, FiCheckCircle, FiXCircle, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiSearch, FiImage, FiX, FiCheckCircle, FiXCircle, FiMail, FiPhone, FiMapPin, FiExternalLink } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
 import getImageUrl from '../utils/imageUrl';
 import { useAuth } from '../context/AuthContext';
+import config from '../config/app';
 import './Shops.css';
 
 const Shops = () => {
@@ -143,6 +144,22 @@ const Shops = () => {
     }));
   };
 
+  const validatePhoneNumber = (phone) => {
+    if (!phone || !phone.trim()) {
+      return { valid: false, message: 'Phone number is required' };
+    }
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone.startsWith('+20')) {
+      return { valid: false, message: 'Phone number must start with +20 (Egypt international format)' };
+    }
+    // Check if it's a valid Egyptian phone number: +20 followed by 10 digits
+    const phoneDigits = trimmedPhone.replace(/\D/g, ''); // Remove all non-digits
+    if (phoneDigits.length !== 12 || !phoneDigits.startsWith('20')) {
+      return { valid: false, message: 'Phone number must be in format: +20XXXXXXXXXX (12 digits including country code)' };
+    }
+    return { valid: true, message: '' };
+  };
+
   const validateForm = () => {
     if (!formData.name.trim()) {
       toast.error('Shop name is required');
@@ -156,14 +173,21 @@ const Shops = () => {
       toast.error('Please enter a valid email address');
       return false;
     }
-    if (!formData.mobile.trim()) {
-      toast.error('Mobile number is required');
+    
+    // Validate mobile number
+    const mobileValidation = validatePhoneNumber(formData.mobile);
+    if (!mobileValidation.valid) {
+      toast.error(mobileValidation.message);
       return false;
     }
-    if (!formData.whatsapp.trim()) {
-      toast.error('WhatsApp number is required');
+    
+    // Validate WhatsApp number
+    const whatsappValidation = validatePhoneNumber(formData.whatsapp);
+    if (!whatsappValidation.valid) {
+      toast.error(`WhatsApp: ${whatsappValidation.message}`);
       return false;
     }
+    
     if (!formData.category) {
       toast.error('Category is required');
       return false;
@@ -394,13 +418,14 @@ const Shops = () => {
               <th>Address</th>
               <th>Status</th>
               <th>Approval</th>
+              <th>View in Portal</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filteredShops.length === 0 ? (
               <tr>
-                <td colSpan="9" className="no-data">No shops found</td>
+                <td colSpan="10" className="no-data">No shops found</td>
               </tr>
             ) : (
               filteredShops.map((shop) => (
@@ -481,6 +506,21 @@ const Shops = () => {
                       <span className="approval-status pending" style={{ color: '#dc2626', fontWeight: '600' }}>
                         <FiXCircle /> Pending Verification
                       </span>
+                    )}
+                  </td>
+                  <td>
+                    {shop.shareLink ? (
+                      <a
+                        href={`${config.frontendPortalURL}/shop/${shop.shareLink}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="external-link"
+                        title="View shop in frontend portal"
+                      >
+                        <FiExternalLink /> View
+                      </a>
+                    ) : (
+                      <span className="no-badge">-</span>
                     )}
                   </td>
                   <td>
@@ -572,8 +612,11 @@ const Shops = () => {
                     value={formData.mobile}
                     onChange={handleInputChange}
                     required
-                    placeholder=""
+                    placeholder="+20XXXXXXXXXX"
+                    pattern="\+20[0-9]{10}"
+                    title="Must start with +20 followed by 10 digits"
                   />
+                  <small className="form-hint">Format: +20XXXXXXXXXX (Egypt international format)</small>
                 </div>
                 <div className="form-group">
                   <label>WhatsApp Number *</label>
@@ -583,8 +626,11 @@ const Shops = () => {
                     value={formData.whatsapp}
                     onChange={handleInputChange}
                     required
-                    placeholder=""
+                    placeholder="+20XXXXXXXXXX"
+                    pattern="\+20[0-9]{10}"
+                    title="Must start with +20 followed by 10 digits"
                   />
+                  <small className="form-hint">Format: +20XXXXXXXXXX (Egypt international format)</small>
                 </div>
               </div>
 

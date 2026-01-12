@@ -47,6 +47,14 @@ const orderLogSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  orderNumber: {
+    type: String,
+    default: function() {
+      return Date.now().toString();
+    },
+    unique: true,
+    index: true
+  },
   channel: {
     type: String,
     default: 'whatsapp',
