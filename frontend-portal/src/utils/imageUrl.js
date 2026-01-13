@@ -15,5 +15,10 @@ export const getImageUrl = (imagePath) => {
   return `${config.imageBaseURL}${imagePath}`;
 };
 
+// Handle image load errors - hide broken images instead of loading external placeholders
+export const handleImageError = (e) => {
+  e.target.style.display = 'none';
+};
+
 export default getImageUrl;
 

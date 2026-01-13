@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import getImageUrl from '../utils/imageUrl';
+import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import { toast } from 'react-toastify';
 import './ProductModal.css';
 
@@ -89,9 +89,7 @@ const ProductModal = ({ productId, onClose }) => {
             <img
               src={getImageUrl(product.image)}
               alt={product.name}
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/500x500?text=No+Image';
-              }}
+              onError={handleImageError}
             />
           </div>
 

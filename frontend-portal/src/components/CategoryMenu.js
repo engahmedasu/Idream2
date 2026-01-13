@@ -14,19 +14,24 @@ const CategoryMenu = () => {
   useEffect(() => {
     fetchCategories();
     
-    // Refresh categories every 30 seconds to get updates from admin portal
+    // Refresh categories every 2 minutes (reduced from 30 seconds) to get updates from admin portal
     const refreshInterval = setInterval(() => {
       fetchCategories();
-    }, 30000);
+    }, 120000); // 2 minutes
 
-    // Refresh when window regains focus (user switches back to tab)
+    // Refresh when window regains focus (with debounce to prevent multiple calls)
+    let focusTimeout;
     const handleFocus = () => {
-      fetchCategories();
+      clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(() => {
+        fetchCategories();
+      }, 1000); // Wait 1 second after focus to avoid rapid calls
     };
     window.addEventListener('focus', handleFocus);
 
     return () => {
       clearInterval(refreshInterval);
+      clearTimeout(focusTimeout);
       window.removeEventListener('focus', handleFocus);
     };
   }, []);

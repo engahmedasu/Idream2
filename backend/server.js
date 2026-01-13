@@ -1,13 +1,18 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const path = require('path');
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./config/swagger');
-
 // Suppress DEP0060 deprecation warning (util._extend) from dependencies
-// This warning comes from older dependencies that haven't been updated yet
+// This warning comes from older dependencies (like some versions of mongoose/nodemailer)
+// that haven't been updated to use Object.assign() instead of util._extend
+// Set this handler BEFORE requiring any modules to catch warnings during module loading
+const originalEmitWarning = process.emitWarning;
+process.emitWarning = function(warning, type, code, ctor) {
+  // Suppress only DEP0060 (util._extend) warnings
+  if (type === 'DeprecationWarning' && code === 'DEP0060') {
+    return; // Silently ignore
+  }
+  // Pass through all other warnings
+  return originalEmitWarning.call(this, warning, type, code, ctor);
+};
+
+// Also handle process.on('warning') events as a fallback
 process.on('warning', (warning) => {
   if (warning.name === 'DeprecationWarning' && warning.code === 'DEP0060') {
     // Suppress util._extend deprecation warning - it's from a dependency, not our code
@@ -16,6 +21,14 @@ process.on('warning', (warning) => {
   // Show other warnings normally
   console.warn(warning.name, warning.message);
 });
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 
 // Load centralized configuration
 const config = require('./config/app');

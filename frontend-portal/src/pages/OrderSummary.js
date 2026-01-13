@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
-import getImageUrl from '../utils/imageUrl';
+import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import './OrderSummary.css';
 
 const OrderSummary = () => {
@@ -148,9 +148,7 @@ const OrderSummary = () => {
                     <img
                       src={getImageUrl(item.product?.image || item.productImage || '')}
                       alt={item.product?.name || item.productName || 'Product'}
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/200x200?text=No+Image';
-                      }}
+                      onError={handleImageError}
                     />
                   </div>
                   <div className="item-details">

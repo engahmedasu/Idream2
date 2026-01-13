@@ -83,11 +83,43 @@ const VideoBanner = ({ categoryId = null }) => {
     if (videoRef.current && currentVideo.videoUrl && !currentVideo.videoUrl.includes('youtube.com') && !currentVideo.videoUrl.includes('youtu.be')) {
       const videoSource = getVideoSource(currentVideo);
       if (videoSource) {
-        videoRef.current.src = videoSource;
-        videoRef.current.load();
-        videoRef.current.play().catch(err => {
-          console.log('Autoplay prevented:', err);
-        });
+        const video = videoRef.current;
+        const currentSrc = video.src || video.currentSrc;
+        
+        // Only reload if the source has changed
+        if (currentSrc !== videoSource) {
+          // Pause and reset current time to prevent conflicts
+          video.pause();
+          video.currentTime = 0;
+          
+          // Remove any existing event listeners to prevent conflicts
+          const handleCanPlay = () => {
+            // Use requestAnimationFrame to ensure DOM is ready
+            requestAnimationFrame(() => {
+              video.play().catch(err => {
+                // Only log if it's not an AbortError (which is expected when interrupted)
+                if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                  console.log('Autoplay prevented:', err);
+                }
+              });
+            });
+            video.removeEventListener('canplay', handleCanPlay);
+          };
+          
+          // Wait for video to be ready before playing
+          video.addEventListener('canplay', handleCanPlay, { once: true });
+          
+          // Set source and load
+          video.src = videoSource;
+          video.load();
+        } else if (video.paused) {
+          // If same source but paused, just resume
+          video.play().catch(err => {
+            if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+              console.log('Autoplay prevented:', err);
+            }
+          });
+        }
       }
     }
 
@@ -96,7 +128,7 @@ const VideoBanner = ({ categoryId = null }) => {
     // For full sequential playback with YouTube, consider implementing YouTube IFrame Player API
     if (iframeRef.current && currentVideo.videoUrl && (currentVideo.videoUrl.includes('youtube.com') || currentVideo.videoUrl.includes('youtu.be'))) {
       const videoSource = getVideoSource(currentVideo);
-      if (videoSource) {
+      if (videoSource && iframeRef.current.src !== videoSource) {
         iframeRef.current.src = videoSource;
       }
     }

@@ -12,30 +12,41 @@
   flex-direction: column;
   align-items: stretch;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
-.advertisement {
+.advertisement-slider-wrapper {
+  width: 100%;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.advertisement-slider {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
+.advertisement-slide {
+  /* Each slide takes full width of container (100% / number of slides) */
   width: 100%;
   height: 100%;
-  border-radius: 0;
-  overflow: hidden;
-  box-shadow: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  flex-grow: 0;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
+  position: relative;
+  background: #f3f4f6; /* Light gray background to prevent empty space */
 }
 
-.advertisement.clickable {
+.advertisement-slide.clickable {
   cursor: pointer;
-}
-
-.advertisement.clickable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .advertisement-image {
@@ -44,11 +55,13 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  flex: 1;
-  min-width: 0;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-drag: none;
+  background: #f3f4f6; /* Fallback background while loading */
+  min-height: 100%; /* Ensure it fills the container */
 }
 
 /* Responsive styles */
@@ -74,5 +87,60 @@
 @media (max-width: 768px) {
   .advertisement-container {
     display: none;
+  }
+}
+
+/* Indicator dots */
+.advertisement-indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+}
+
+.advertisement-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.advertisement-indicator:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: scale(1.2);
+}
+
+.advertisement-indicator.active {
+  background: #ffffff;
+  width: 24px;
+  border-radius: 4px;
+  transform: scale(1);
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .advertisement-slider {
+    transition: none !important;
+  }
+  
+  .advertisement-container {
+    animation: none !important;
+  }
+  
+  .advertisement-indicator {
+    transition: none !important;
   }
 }

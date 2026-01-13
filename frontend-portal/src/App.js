@@ -23,6 +23,7 @@ import PageDetail from './pages/PageDetail';
 import OrderSummary from './pages/OrderSummary';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { AdvertisementProvider } from './context/AdvertisementContext';
 
 function AppContent() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -61,9 +62,11 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <AppContent />
-        </Router>
+        <AdvertisementProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <AppContent />
+          </Router>
+        </AdvertisementProvider>
       </CartProvider>
     </AuthProvider>
   );

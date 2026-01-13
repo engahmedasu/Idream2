@@ -10,7 +10,7 @@ import Advertisement from '../components/Advertisement';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import getImageUrl from '../utils/imageUrl';
+import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
@@ -211,7 +211,7 @@ const CategoryPage = () => {
     <div className="category-page">
       <div className="category-page-wrapper">
         {/* Left Advertisement */}
-        <Advertisement categoryId={id} side="left" />
+        <Advertisement key="ad-left" categoryId={id} side="left" />
         
         <div className="category-page-container">
           {/* Video Banner Section */}
@@ -271,9 +271,7 @@ const CategoryPage = () => {
                       <img
                         src={getImageUrl(offer.image)}
                         alt={offer.name}
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/400x250?text=Offer';
-                        }}
+                        onError={handleImageError}
                       />
                       <span className="sponsored-badge">Special Deal</span>
                     </div>
@@ -386,7 +384,7 @@ const CategoryPage = () => {
         </div>
         
         {/* Right Advertisement */}
-        <Advertisement categoryId={id} side="right" />
+        <Advertisement key="ad-right" categoryId={id} side="right" />
       </div>
     </div>
   );

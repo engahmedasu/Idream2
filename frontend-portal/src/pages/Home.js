@@ -10,7 +10,7 @@ import Advertisement from '../components/Advertisement';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import getImageUrl from '../utils/imageUrl';
+import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import './Home.css';
 
 const Home = () => {
@@ -56,19 +56,24 @@ const Home = () => {
   useEffect(() => {
     fetchData();
     
-    // Refresh data every 30 seconds to get updates from admin portal
+    // Refresh data every 2 minutes (reduced from 30 seconds) to get updates from admin portal
     const refreshInterval = setInterval(() => {
       fetchData();
-    }, 30000);
+    }, 120000); // 2 minutes
 
-    // Refresh when window regains focus
+    // Refresh when window regains focus (with debounce to prevent multiple calls)
+    let focusTimeout;
     const handleFocus = () => {
-      fetchData();
+      clearTimeout(focusTimeout);
+      focusTimeout = setTimeout(() => {
+        fetchData();
+      }, 1000); // Wait 1 second after focus to avoid rapid calls
     };
     window.addEventListener('focus', handleFocus);
 
     return () => {
       clearInterval(refreshInterval);
+      clearTimeout(focusTimeout);
       window.removeEventListener('focus', handleFocus);
     };
   }, [fetchData]);
@@ -287,9 +292,7 @@ const Home = () => {
                       <img
                         src={getImageUrl(offer.image)}
                         alt={offer.name}
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/400x250?text=Offer';
-                        }}
+                        onError={handleImageError}
                       />
                       <span className="sponsored-badge">Special Deal</span>
                     </div>
@@ -448,7 +451,7 @@ const Home = () => {
         </div>
         
         {/* Right Advertisement */}
-        <Advertisement categoryId={firstCategory?._id} side="right" />
+        <Advertisement key="ad-right" categoryId={firstCategory?._id} side="right" />
       </div>
     </div>
   );

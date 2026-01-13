@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import ProductGrid from '../components/ProductGrid';
 import api from '../utils/api';
-import getImageUrl from '../utils/imageUrl';
+import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import './ShopPage.css';
 
 const ShopPage = () => {
@@ -123,11 +123,9 @@ const ShopPage = () => {
         <div className="shop-hero">
           <div className="shop-image-banner">
             <img
-              src={shop.image ? getImageUrl(shop.image) : 'https://via.placeholder.com/1200x400?text=Shop'}
+              src={shop.image ? getImageUrl(shop.image) : ''}
               alt={shop.name}
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/1200x400?text=Shop';
-              }}
+              onError={handleImageError}
             />
             <div className="shop-image-overlay"></div>
             <div className="shop-overlay-content">
