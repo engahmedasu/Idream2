@@ -64,7 +64,7 @@ const config = {
 
   // Email Configuration
   email: {
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    host: process.env.EMAIL_HOST || 'smtp.zoho.com',
     port: parseInt(process.env.EMAIL_PORT, 10) || 587,
     secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
     user: process.env.EMAIL_USER || '',

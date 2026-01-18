@@ -26,6 +26,7 @@ const Advertisements = () => {
     imageUrl: '',
     side: 'left',
     isActive: true,
+    showInHome: false,
     startDate: '',
     endDate: '',
     redirectUrl: '',
@@ -99,6 +100,7 @@ const Advertisements = () => {
         imageUrl: '',
         side: 'left',
         isActive: true,
+        showInHome: false,
         startDate: '',
         endDate: '',
         redirectUrl: '',
@@ -201,6 +203,7 @@ const Advertisements = () => {
 
       submitData.append('side', formData.side);
       submitData.append('isActive', formData.isActive);
+      submitData.append('showInHome', formData.showInHome);
       submitData.append('categories', JSON.stringify(formData.categories));
       submitData.append('priority', formData.priority);
       
@@ -246,6 +249,7 @@ const Advertisements = () => {
       imageUrl: ad.image || '',
       side: ad.side,
       isActive: ad.isActive,
+      showInHome: ad.showInHome || false,
       startDate: ad.startDate ? new Date(ad.startDate).toISOString().split('T')[0] : '',
       endDate: ad.endDate ? new Date(ad.endDate).toISOString().split('T')[0] : '',
       redirectUrl: ad.redirectUrl || '',
@@ -300,6 +304,7 @@ const Advertisements = () => {
       imageUrl: '',
       side: 'left',
       isActive: true,
+      showInHome: false,
       startDate: '',
       endDate: '',
       redirectUrl: '',
@@ -418,6 +423,7 @@ const Advertisements = () => {
                 <th>End Date</th>
                 <th>Priority</th>
                 <th>Status</th>
+                <th>Show in Home</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -477,6 +483,11 @@ const Advertisements = () => {
                   <td>
                     <span className={`status-badge ${ad.isActive ? 'active' : 'inactive'}`}>
                       {ad.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`status-badge ${ad.showInHome ? 'active' : 'inactive'}`}>
+                      {ad.showInHome ? 'Yes' : 'No'}
                     </span>
                   </td>
                   <td>
@@ -676,6 +687,19 @@ const Advertisements = () => {
                   />
                   Active
                 </label>
+              </div>
+
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="showInHome"
+                    checked={formData.showInHome}
+                    onChange={handleInputChange}
+                  />
+                  Show on Home Screen
+                </label>
+                <small className="form-hint">Enable this to display the advertisement on the home page</small>
               </div>
 
               <div className="modal-actions">

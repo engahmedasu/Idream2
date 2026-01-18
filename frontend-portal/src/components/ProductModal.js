@@ -101,19 +101,18 @@ const ProductModal = ({ productId, onClose }) => {
               <FiStar className="star-icon" />
               <span className="rating-value">
                 {(() => {
-                  const totalReviews = reviews?.totalReviews || 0;
-                  const avgRating = reviews?.averageRating || 0;
-                  // Calculate: sum of stars / number of reviews
-                  // If calculated average < 2.5, display 2.5 as minimum
-                  // If no reviews, show 2.5
-                  if (totalReviews > 0) {
-                    return Math.max(2.5, avgRating).toFixed(1);
+                  const totalReviews = product.totalReviews || 0;
+                  const avgRating = typeof product.averageRating === 'number' ? product.averageRating : 0;
+                  // Display the actual rating from the backend
+                  if (totalReviews > 0 && avgRating > 0) {
+                    return avgRating.toFixed(1);
                   }
-                  return '2.5';
+                  // If no reviews or no rating, show 0 or default
+                  return avgRating > 0 ? avgRating.toFixed(1) : '0.0';
                 })()}
               </span>
               <span className="rating-count">
-                ({reviews?.totalReviews || 0} {t('product.rating') || 'reviews'})
+                ({product.totalReviews || 0} {t('product.rating') || 'reviews'})
               </span>
             </div>
 

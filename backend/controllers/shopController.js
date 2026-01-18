@@ -27,11 +27,18 @@ exports.getAllShops = async (req, res) => {
     const { category, isActive, search } = req.query;
     const filter = {};
 
-    // If user is mallAdmin or Sales role, restrict to shops they created
+    // If user is mallAdmin or Sales role, restrict to shops based on allowedCategories
     if (req.user && req.user.role) {
       const roleName = req.user.role.name || req.user.role;
       if (roleName === 'mallAdmin' || roleName === 'Sales') {
-        filter.createdBy = req.user._id;
+        // If mallAdmin has allowedCategories defined, use those
+        if (req.user.allowedCategories && req.user.allowedCategories.length > 0) {
+          const categoryIds = req.user.allowedCategories.map(cat => cat._id || cat);
+          filter.category = { $in: categoryIds };
+        } else {
+          // Fallback to shops they created (for backward compatibility)
+          filter.createdBy = req.user._id;
+        }
       }
     }
 

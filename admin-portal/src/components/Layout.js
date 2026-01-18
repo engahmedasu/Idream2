@@ -81,7 +81,7 @@ const Layout = () => {
       path: '/categories',
       icon: FiGrid,
       label: 'Categories',
-      roles: ['superAdmin', 'mallAdmin']
+      roles: ['superAdmin']
     },
     {
       type: 'item',
@@ -109,7 +109,7 @@ const Layout = () => {
       path: '/subscription-plans',
       icon: FiDollarSign,
       label: 'Subscription Plans',
-      roles: ['superAdmin', 'mallAdmin']
+      roles: ['superAdmin']
     },
     {
       type: 'item',

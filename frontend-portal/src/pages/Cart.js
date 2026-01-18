@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import getImageUrl from '../utils/imageUrl';
+import formatCurrency from '../utils/formatCurrency';
 import './Cart.css';
 
 const Cart = () => {
@@ -69,9 +70,9 @@ const Cart = () => {
                   <h3>{item.product.name}</h3>
                   <p className="cart-item-shop">{item.product.shop?.name}</p>
                   <div className="cart-item-pricing">
-                    <p className="cart-item-price">Price: ${item.product.price?.toFixed(2) || '0.00'}</p>
+                    <p className="cart-item-price">Price: {formatCurrency(item.product.price?.toFixed(2) || '0.00')}</p>
                     {(item.product.shippingFees ?? 0) > 0 && (
-                      <p className="cart-item-shipping">Shipping: ${item.product.shippingFees.toFixed(2)}</p>
+                      <p className="cart-item-shipping">Shipping: {formatCurrency(item.product.shippingFees.toFixed(2))}</p>
                     )}
                   </div>
                 </div>
@@ -93,11 +94,11 @@ const Cart = () => {
                   </button>
                 </div>
                 <div className="cart-item-total">
-                  ${(() => {
+                  {formatCurrency((() => {
                     const price = item.product.price || 0;
                     const shipping = item.product.shippingFees || 0;
                     return ((price + shipping) * item.quantity).toFixed(2);
-                  })()}
+                  })())}
                 </div>
               </div>
             ))}
@@ -106,11 +107,11 @@ const Cart = () => {
             <h2>Order Summary</h2>
             <div className="summary-row">
               <span>Subtotal:</span>
-              <span>${total.toFixed(2)}</span>
+              <span>{formatCurrency(total.toFixed(2))}</span>
             </div>
             <div className="summary-row">
               <span>Total:</span>
-              <span className="total-amount">${total.toFixed(2)}</span>
+              <span className="total-amount">{formatCurrency(total.toFixed(2))}</span>
             </div>
             <button className="checkout-btn">Proceed to Checkout</button>
             <button className="continue-shopping-btn" onClick={() => navigate('/')}>

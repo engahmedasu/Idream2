@@ -22,29 +22,30 @@ export const AdvertisementProvider = ({ children }) => {
     cacheRef.current = adCache;
   }, [adCache]);
 
-  const fetchAdvertisements = useCallback(async (categoryId, side) => {
-    // Use a side-only cache key to load once per side regardless of category
-    const sideCacheKey = `side-${side}`;
+  const fetchAdvertisements = useCallback(async (categoryId, side, home = false) => {
+    // Use cache key that includes categoryId/home flag and side
+    // This ensures different categories/home get their own cached ads
+    const cacheKey = home ? `home-${side}` : `${categoryId || 'all'}-${side}`;
     
     // Return cached data if available (persist for entire session - only cleared on page refresh)
-    const cached = cacheRef.current[sideCacheKey];
-    if (cached && cached.data && cached.data.length > 0) {
+    const cached = cacheRef.current[cacheKey];
+    if (cached && cached.data) {
       // Cache persists for entire session - no expiration
       return cached.data;
     }
 
-    // If this side has already been loaded but cache is empty, return empty array
-    // This prevents infinite retries when there are no advertisements for this side
-    if (loadedSidesRef.current.has(side)) {
+    // If this category-side combination has already been loaded but cache is empty, return empty array
+    // This prevents infinite retries when there are no advertisements for this category-side
+    if (loadedSidesRef.current.has(cacheKey)) {
       return cached?.data || [];
     }
 
     // Prevent duplicate requests - wait for existing request
-    if (loadingStatesRef.current[sideCacheKey]) {
+    if (loadingStatesRef.current[cacheKey]) {
       return new Promise((resolve) => {
         const checkCache = setInterval(() => {
-          const currentCache = cacheRef.current[sideCacheKey];
-          if (currentCache && !loadingStatesRef.current[sideCacheKey]) {
+          const currentCache = cacheRef.current[cacheKey];
+          if (currentCache && !loadingStatesRef.current[cacheKey]) {
             clearInterval(checkCache);
             resolve(currentCache.data);
           }
@@ -59,10 +60,15 @@ export const AdvertisementProvider = ({ children }) => {
     }
 
     try {
-      loadingStatesRef.current[sideCacheKey] = true;
+      loadingStatesRef.current[cacheKey] = true;
       
-      // Fetch all active advertisements for this side (ignore category filter after initial load)
+      // Fetch active advertisements for this side, filtered by category or home flag
       const params = { side };
+      if (home) {
+        params.home = 'true';
+      } else if (categoryId) {
+        params.category = categoryId;
+      }
       
       const response = await api.get('/advertisements/active', { params });
       
@@ -70,26 +76,26 @@ export const AdvertisementProvider = ({ children }) => {
         .filter(ad => ad && ad.image)
         .sort((a, b) => (b.priority || 0) - (a.priority || 0));
       
-      // Cache the result with side-only key
+      // Cache the result with category-side key
       setAdCache(prev => ({
         ...prev,
-        [sideCacheKey]: {
+        [cacheKey]: {
           data: sortedAds,
           timestamp: Date.now()
         }
       }));
       
-      // Mark this side as loaded
-      loadedSidesRef.current.add(side);
+      // Mark this category-side combination as loaded
+      loadedSidesRef.current.add(cacheKey);
       
       return sortedAds;
     } catch (error) {
       console.error('Error fetching advertisements:', error);
       // Mark as loaded even on error to prevent retries
-      loadedSidesRef.current.add(side);
+      loadedSidesRef.current.add(cacheKey);
       return [];
     } finally {
-      delete loadingStatesRef.current[sideCacheKey];
+      delete loadingStatesRef.current[cacheKey];
     }
   }, []); // Empty dependency array - function is stable now
 

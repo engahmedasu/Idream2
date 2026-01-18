@@ -33,7 +33,17 @@ const { auth, optionalAuth, authorize } = require('../middleware/auth');
  *                   items:
  *                     type: object
  */
-router.get('/plans', optionalAuth, subscriptionController.getPlans);
+// Public endpoint - only for unauthenticated users or superAdmin
+router.get('/plans', optionalAuth, (req, res, next) => {
+  // If user is authenticated, only allow superAdmin
+  if (req.user) {
+    const userRole = req.user.role?.name;
+    if (userRole !== 'superAdmin') {
+      return res.status(403).json({ message: 'Access denied. Subscription plans are only available to unauthenticated users or superAdmin.' });
+    }
+  }
+  next();
+}, subscriptionController.getPlans);
 
 /**
  * @swagger
@@ -51,9 +61,9 @@ router.get('/plans', optionalAuth, subscriptionController.getPlans);
  */
 router.get('/shop', auth, subscriptionController.getShopSubscription);
 
-// Admin routes - require authentication and superAdmin or mallAdmin role
+// Admin routes - require authentication and superAdmin role only
 router.use(auth);
-router.use(authorize('superAdmin', 'mallAdmin'));
+router.use(authorize('superAdmin'));
 
 /**
  * @swagger

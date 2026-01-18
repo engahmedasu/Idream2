@@ -6,9 +6,47 @@ const Product = require('../models/Product');
 exports.getAllCategories = async (req, res) => {
   try {
     const { isActive } = req.query;
-    const filter = {};
+    let filter = {};
 
     if (isActive !== undefined) filter.isActive = isActive === 'true';
+
+    // If user is mallAdmin or Sales role, restrict to allowedCategories or shops they created
+    if (req.user && req.user.role) {
+      const roleName = req.user.role.name || req.user.role;
+      if (roleName === 'mallAdmin' || roleName === 'Sales') {
+        // If mallAdmin has allowedCategories defined, use those
+        if (req.user.allowedCategories && req.user.allowedCategories.length > 0) {
+          const categoryIds = req.user.allowedCategories.map(cat => cat._id || cat);
+          filter._id = { $in: categoryIds };
+        } else {
+          // Fallback to categories from shops they created (for backward compatibility)
+          const userShops = await Shop.find({ createdBy: req.user._id }).select('category');
+          const categoryIds = userShops
+            .map(shop => shop.category)
+            .filter(cat => cat) // Remove null/undefined
+            .map(cat => cat._id || cat) // Extract ID if populated
+            .filter((catId, index, self) => self.indexOf(catId) === index); // Get unique IDs
+          
+          if (categoryIds.length > 0) {
+            filter._id = { $in: categoryIds };
+          } else {
+            filter._id = { $in: [] };
+          }
+        }
+      } else if (roleName === 'shopAdmin') {
+        // For shopAdmin, restrict to their shop's category only
+        if (req.user.shop) {
+          const shop = await Shop.findById(req.user.shop).select('category');
+          if (shop && shop.category) {
+            filter._id = shop.category._id || shop.category;
+          } else {
+            filter._id = { $in: [] }; // No category if shop doesn't have one
+          }
+        } else {
+          filter._id = { $in: [] }; // No categories if no shop assigned
+        }
+      }
+    }
 
     const categories = await Category.find(filter)
       .populate('createdBy', 'email')

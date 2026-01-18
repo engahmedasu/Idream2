@@ -14,6 +14,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [shops, setShops] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -27,6 +28,7 @@ const Users = () => {
     password: '',
     role: '',
     shop: '',
+    allowedCategories: [],
     isActive: true,
     isEmailVerified: false
   });
@@ -54,15 +56,17 @@ const Users = () => {
       if (filterRole) params.role = filterRole;
       if (filterStatus !== '') params.isActive = filterStatus === 'active';
 
-      const [usersRes, rolesRes, shopsRes] = await Promise.all([
+      const [usersRes, rolesRes, shopsRes, categoriesRes] = await Promise.all([
         api.get('/users', { params }),
         api.get('/roles'),
-        api.get('/shops?isActive=true')
+        api.get('/shops?isActive=true'),
+        api.get('/categories?isActive=true')
       ]);
       
       setUsers(usersRes.data);
       setRoles(rolesRes.data);
       setShops(shopsRes.data);
+      setCategories(categoriesRes.data);
     } catch (error) {
       toast.error('Failed to fetch data');
       console.error(error);
@@ -84,6 +88,7 @@ const Users = () => {
         password: '',
         role: '',
         shop: '',
+        allowedCategories: [],
         isActive: true,
         isEmailVerified: false
       });
@@ -128,6 +133,18 @@ const Users = () => {
     }
     
     return { valid: true, message: '' };
+  };
+
+  const handleCategoryToggle = (categoryId) => {
+    const currentCategories = formData.allowedCategories || [];
+    const isSelected = currentCategories.includes(categoryId);
+    
+    setFormData(prev => ({
+      ...prev,
+      allowedCategories: isSelected
+        ? currentCategories.filter(id => id !== categoryId)
+        : [...currentCategories, categoryId]
+    }));
   };
 
   const handleInputChange = (e) => {
@@ -234,11 +251,25 @@ const Users = () => {
         submitData.shop = null;
       }
 
+      // Handle allowedCategories - ensure it's an array
+      if (!Array.isArray(submitData.allowedCategories)) {
+        submitData.allowedCategories = submitData.allowedCategories ? [submitData.allowedCategories] : [];
+      }
+
       // For new users, if role is guest or shopAdmin, ensure isActive is false
       if (!editingUser) {
         const selectedRole = roles.find(r => r._id === submitData.role);
         if (selectedRole && (selectedRole.name === 'guest' || selectedRole.name === 'shopAdmin')) {
           submitData.isActive = false;
+        }
+      }
+
+      // Validate that MallAdmin has at least one category selected
+      const selectedRole = roles.find(r => r._id === submitData.role);
+      if (selectedRole && selectedRole.name === 'mallAdmin') {
+        if (!submitData.allowedCategories || submitData.allowedCategories.length === 0) {
+          toast.error('MallAdmin must have at least one allowed category selected');
+          return;
         }
       }
 
@@ -259,12 +290,16 @@ const Users = () => {
 
   const handleEdit = (user) => {
     setEditingUser(user);
+    const allowedCategoriesIds = user.allowedCategories
+      ? user.allowedCategories.map(cat => cat._id || cat)
+      : [];
     setFormData({
       email: user.email,
       phone: user.phone,
       password: '', // Don't pre-fill password
       role: user.role?._id || user.role || '',
       shop: user.shop?._id || user.shop || '',
+      allowedCategories: allowedCategoriesIds,
       isActive: user.isActive,
       isEmailVerified: user.isEmailVerified
     });
@@ -302,6 +337,7 @@ const Users = () => {
       password: '',
       role: '',
       shop: '',
+      allowedCategories: [],
       isActive: false, // Default to false, will be set based on role selection
       isEmailVerified: false
     });
@@ -320,6 +356,7 @@ const Users = () => {
       password: '',
       role: '',
       shop: '',
+      allowedCategories: [],
       isActive: true,
       isEmailVerified: false
     });
@@ -581,20 +618,69 @@ const Users = () => {
                     ))}
                   </select>
                 </div>
-                <div className="form-group">
-                  <label>Shop (Optional)</label>
-                  <select
-                    name="shop"
-                    value={formData.shop}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">No Shop</option>
-                    {shops.map(shop => (
-                      <option key={shop._id} value={shop._id}>{shop.name}</option>
-                    ))}
-                  </select>
-                </div>
+                {/* Hide shop dropdown for MallAdmin */}
+                {(() => {
+                  const selectedRole = roles.find(r => r._id === formData.role);
+                  const isMallAdmin = selectedRole && selectedRole.name === 'mallAdmin';
+                  
+                  if (!isMallAdmin) {
+                    return (
+                      <div className="form-group">
+                        <label>Shop (Optional)</label>
+                        <select
+                          name="shop"
+                          value={formData.shop}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">No Shop</option>
+                          {shops.map(shop => (
+                            <option key={shop._id} value={shop._id}>{shop.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
+              {/* Show category selection only for MallAdmin role */}
+              {(() => {
+                const selectedRole = roles.find(r => r._id === formData.role);
+                const isMallAdmin = selectedRole && selectedRole.name === 'mallAdmin';
+                
+                if (isMallAdmin) {
+                  return (
+                    <div className="form-group">
+                      <label>Allowed Categories *</label>
+                      <div className="category-checkboxes">
+                        {categories.length === 0 ? (
+                          <div className="category-empty">
+                            <small>No categories available</small>
+                          </div>
+                        ) : (
+                          categories.map(category => (
+                            <label 
+                              key={category._id} 
+                              className={`category-checkbox-item ${formData.allowedCategories?.includes(category._id) ? 'selected' : ''}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={formData.allowedCategories?.includes(category._id) || false}
+                                onChange={() => handleCategoryToggle(category._id)}
+                              />
+                              <span className="category-checkbox-label">{category.name}</span>
+                            </label>
+                          ))
+                        )}
+                      </div>
+                      <small className="form-hint">
+                        Select the categories this MallAdmin can access. They will only be able to create shops and products in these categories.
+                      </small>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
               <div className="form-group checkbox-group">
                 <label>
                   <input

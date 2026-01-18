@@ -273,11 +273,11 @@ MONGODB_URI=mongodb+srv://idream_db_user:aihKqt50kYMGiwtr@psteg.qmqc74r.mongodb.
 JWT_SECRET=<your-generated-secret-here>
 JWT_EXPIRE=7d
 
-# Email configuration (Gmail example)
-EMAIL_HOST=smtp.gmail.com
+# Email configuration (Zoho Mail example)
+EMAIL_HOST=smtp.zoho.com
 EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_USER=your-email@zoho.com
+EMAIL_PASS=your-password
 
 # CORS Configuration (allowed origins for API access)
 # Separate multiple origins with commas (no spaces)

@@ -53,7 +53,7 @@ exports.getAllAdvertisements = async (req, res) => {
 // Get active advertisements for frontend (public)
 exports.getActiveAdvertisements = async (req, res) => {
   try {
-    const { category, side } = req.query;
+    const { category, side, home } = req.query;
     const now = new Date();
     
     const filter = {
@@ -65,6 +65,11 @@ exports.getActiveAdvertisements = async (req, res) => {
         { startDate: { $lte: now }, endDate: { $gte: now } }
       ]
     };
+
+    // If home=true is passed, filter by showInHome flag
+    if (home === 'true') {
+      filter.showInHome = true;
+    }
 
     if (category) {
       filter.categories = { $in: [category] };
@@ -157,6 +162,7 @@ exports.createAdvertisement = async (req, res) => {
       categories: categories,
       side: req.body.side,
       isActive: req.body.isActive !== undefined ? req.body.isActive === 'true' : true,
+      showInHome: req.body.showInHome !== undefined ? req.body.showInHome === 'true' : false,
       startDate: req.body.startDate ? new Date(req.body.startDate) : null,
       endDate: req.body.endDate ? new Date(req.body.endDate) : null,
       redirectUrl: req.body.redirectUrl || '',
@@ -234,6 +240,7 @@ exports.updateAdvertisement = async (req, res) => {
 
     if (req.body.side !== undefined) advertisement.side = req.body.side;
     if (req.body.isActive !== undefined) advertisement.isActive = req.body.isActive === 'true';
+    if (req.body.showInHome !== undefined) advertisement.showInHome = req.body.showInHome === 'true';
     if (req.body.startDate !== undefined) {
       advertisement.startDate = req.body.startDate ? new Date(req.body.startDate) : null;
     }

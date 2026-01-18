@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/categoryController');
-const { auth, authorize } = require('../middleware/auth');
+const { auth, optionalAuth, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 /**
@@ -26,7 +26,18 @@ const upload = require('../middleware/upload');
  *               items:
  *                 type: object
  */
-router.get('/', categoryController.getAllCategories);
+// Public endpoint - allow unauthenticated users, superAdmin, mallAdmin, Sales, and shopAdmin
+router.get('/', optionalAuth, (req, res, next) => {
+  // If user is authenticated, allow superAdmin, mallAdmin, Sales, and shopAdmin
+  if (req.user) {
+    const userRole = req.user.role?.name;
+    const allowedRoles = ['superAdmin', 'mallAdmin', 'Sales', 'shopAdmin'];
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({ message: 'Access denied. Categories are only available to unauthenticated users, superAdmin, mallAdmin, Sales, or shopAdmin.' });
+    }
+  }
+  next();
+}, categoryController.getAllCategories);
 
 /**
  * @swagger
@@ -46,7 +57,18 @@ router.get('/', categoryController.getAllCategories);
  *       404:
  *         description: Category not found
  */
-router.get('/:id', categoryController.getCategoryById);
+// Public endpoint - allow unauthenticated users, superAdmin, mallAdmin, Sales, and shopAdmin
+router.get('/:id', optionalAuth, (req, res, next) => {
+  // If user is authenticated, allow superAdmin, mallAdmin, Sales, and shopAdmin
+  if (req.user) {
+    const userRole = req.user.role?.name;
+    const allowedRoles = ['superAdmin', 'mallAdmin', 'Sales', 'shopAdmin'];
+    if (!allowedRoles.includes(userRole)) {
+      return res.status(403).json({ message: 'Access denied. Categories are only available to unauthenticated users, superAdmin, mallAdmin, Sales, or shopAdmin.' });
+    }
+  }
+  next();
+}, categoryController.getCategoryById);
 
 /**
  * @swagger

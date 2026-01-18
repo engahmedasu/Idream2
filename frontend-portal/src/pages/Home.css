@@ -388,8 +388,26 @@
 }
 
 @media (max-width: 768px) {
+  .home-wrapper {
+    flex-direction: column;
+    padding: 1rem 0;
+  }
+
   .home-container {
     padding: 1rem;
+    width: 100%;
+  }
+
+  /* Hide desktop side advertisements on mobile */
+  .home-wrapper > .advertisement-container {
+    display: none;
+  }
+
+  /* Show mobile advertisements */
+  .advertisement-mobile {
+    display: block;
+    width: 100%;
+    margin: 1.5rem 0;
   }
 
   .welcome-title {
@@ -425,5 +443,12 @@
 
   .shops-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Hide mobile advertisements on desktop */
+@media (min-width: 769px) {
+  .advertisement-mobile {
+    display: none;
   }
 }

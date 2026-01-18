@@ -54,6 +54,15 @@ const Products = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
 
+  const [validationErrors, setValidationErrors] = useState({
+    name: '',
+    description: '',
+    price: '',
+    shop: '',
+    category: '',
+    image: ''
+  });
+
   // Auto-set shop filter for shopAdmin users
   useEffect(() => {
     if (user && user.role?.name === 'shopAdmin' && user.shop && !filterShop) {
@@ -134,8 +143,10 @@ const Products = () => {
   // Reset form when opening create modal
   useEffect(() => {
     if (showModal && !editingProduct) {
+      const isShopAdmin = user && (user.role?.name === 'shopAdmin' || user.role === 'shopAdmin');
+      
       // Auto-set shop for shopAdmin users
-      const defaultShop = (user && user.role?.name === 'shopAdmin' && user.shop) ? user.shop : '';
+      const defaultShop = (isShopAdmin && user.shop) ? user.shop : '';
       
       // Auto-set category from shop's category for shopAdmin users
       let defaultCategory = '';
@@ -153,6 +164,8 @@ const Products = () => {
             setAvailableProductTypes([]);
           }
         } else {
+          // Shop not found in list yet, but still set the shop ID
+          // Category will be set when shops are loaded (dependency array includes shops)
           setAvailableProductTypes([]);
         }
       } else {
@@ -183,12 +196,35 @@ const Products = () => {
     }
   }, [showModal, editingProduct, user, shops]);
 
+  // Update category when shops are loaded for shopAdmin
+  useEffect(() => {
+    const isShopAdmin = user && (user.role?.name === 'shopAdmin' || user.role === 'shopAdmin');
+    if (showModal && !editingProduct && isShopAdmin && user.shop && formData.shop === user.shop && !formData.category) {
+      const selectedShop = shops.find(s => s._id === user.shop);
+      if (selectedShop && selectedShop.category) {
+        const shopCategoryId = selectedShop.category._id || selectedShop.category;
+        setFormData(prev => ({
+          ...prev,
+          category: shopCategoryId
+        }));
+      }
+    }
+  }, [shops, showModal, editingProduct, user, formData.shop, formData.category]);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : (type === 'number' ? (value === '' ? '' : (isNaN(parseFloat(value)) ? '' : parseFloat(value))) : value)
     }));
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
 
     // When shop changes, update available product types and fetch limits
     if (name === 'shop' && value) {
@@ -227,6 +263,14 @@ const Products = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+      
+      // Clear validation error for image when file is selected
+      if (validationErrors.image) {
+        setValidationErrors(prev => ({
+          ...prev,
+          image: ''
+        }));
+      }
     }
   };
 
@@ -237,37 +281,74 @@ const Products = () => {
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      toast.error('Product name is required');
-      return false;
+    const errors = {
+      name: '',
+      description: '',
+      price: '',
+      shop: '',
+      category: '',
+      image: ''
+    };
+    let hasErrors = false;
+
+    // Validate name
+    if (!formData.name || !formData.name.trim()) {
+      errors.name = 'Product name is required';
+      hasErrors = true;
     }
-    if (!formData.description.trim()) {
-      toast.error('Product description is required');
-      return false;
+
+    // Validate description
+    if (!formData.description || !formData.description.trim()) {
+      errors.description = 'Product description is required';
+      hasErrors = true;
     }
-    if (!formData.price || formData.price <= 0) {
-      toast.error('Product price must be greater than 0');
-      return false;
+
+    // Validate price
+    if (!formData.price || formData.price === '' || parseFloat(formData.price) <= 0) {
+      errors.price = 'Product price must be greater than 0';
+      hasErrors = true;
     }
+
+    // Validate shop
     if (!formData.shop) {
-      toast.error('Shop is required');
-      return false;
+      errors.shop = 'Shop is required';
+      hasErrors = true;
     }
+
+    // Validate category
     if (!formData.category) {
-      toast.error('Category is required');
-      return false;
+      errors.category = 'Category is required';
+      hasErrors = true;
     }
-    // Check product limit
+
+    // Validate image (required for create, optional for update)
+    if (!editingProduct && !imageFile && !formData.image) {
+      errors.image = 'Product image is required';
+      hasErrors = true;
+    }
+
+    setValidationErrors(errors);
+
+    // Show toast for subscription limits (these are separate from field validation)
     if (!limitsStatus.canCreateProduct) {
       toast.error('You reach max number of products to be active based on shop subscription plan');
-      return false;
+      hasErrors = true;
     }
-    // Check hot offer limit if trying to set as hot offer
     if (formData.isHotOffer && !limitsStatus.canSetHotOffer) {
       toast.error('You reach max number of hot offers for this shop subscription plan');
-      return false;
+      hasErrors = true;
     }
-    return true;
+
+    if (hasErrors) {
+      // Scroll to first error field
+      const firstErrorField = document.querySelector('.form-group input.error, .form-group textarea.error, .form-group select.error');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstErrorField.focus();
+      }
+    }
+
+    return !hasErrors;
   };
 
   const handleSubmit = async (e) => {
@@ -330,8 +411,12 @@ const Products = () => {
   };
 
   const handleEdit = async (product) => {
+    const isShopAdmin = user?.role === 'shopAdmin' || user?.role?.name === 'shopAdmin';
+    
     setEditingProduct(product);
-    const shopId = product.shop?._id || product.shop || '';
+    
+    // For shopAdmin, always use their shop, not the product's shop
+    const shopId = (isShopAdmin && user.shop) ? user.shop : (product.shop?._id || product.shop || '');
     const selectedShop = shops.find(s => s._id === shopId);
     if (selectedShop && selectedShop.productTypes) {
       setAvailableProductTypes(selectedShop.productTypes);
@@ -429,6 +514,14 @@ const Products = () => {
       isActive: false,
       isApproved: false,
       averageRating: ''
+    });
+    setValidationErrors({
+      name: '',
+      description: '',
+      price: '',
+      shop: '',
+      category: '',
+      image: ''
     });
     setAvailableProductTypes([]);
     setImageFile(null);
@@ -735,7 +828,11 @@ const Products = () => {
                     onChange={handleInputChange}
                     required
                     placeholder=""
+                    className={validationErrors.name ? 'error' : ''}
                   />
+                  {validationErrors.name && (
+                    <small className="form-error">{validationErrors.name}</small>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Price *</label>
@@ -748,7 +845,11 @@ const Products = () => {
                     min="0"
                     step="0.01"
                     placeholder="0.00"
+                    className={validationErrors.price ? 'error' : ''}
                   />
+                  {validationErrors.price && (
+                    <small className="form-error">{validationErrors.price}</small>
+                  )}
                 </div>
               </div>
 
@@ -761,7 +862,11 @@ const Products = () => {
                   required
                   rows="4"
                   placeholder=""
+                  className={validationErrors.description ? 'error' : ''}
                 />
+                {validationErrors.description && (
+                  <small className="form-error">{validationErrors.description}</small>
+                )}
               </div>
 
               <div className="form-row">
@@ -774,6 +879,7 @@ const Products = () => {
                       readOnly
                       disabled
                       style={{ background: '#f3f4f6', cursor: 'not-allowed' }}
+                      className={validationErrors.shop ? 'error' : ''}
                     />
                   ) : (
                     <select
@@ -781,12 +887,16 @@ const Products = () => {
                       value={formData.shop}
                       onChange={handleInputChange}
                       required
+                      className={validationErrors.shop ? 'error' : ''}
                     >
                       <option value="">Select a shop</option>
                       {shops.map(shop => (
                         <option key={shop._id} value={shop._id}>{shop.name}</option>
                       ))}
                     </select>
+                  )}
+                  {validationErrors.shop && (
+                    <small className="form-error">{validationErrors.shop}</small>
                   )}
                 </div>
                 <div className="form-group">
@@ -798,6 +908,7 @@ const Products = () => {
                       readOnly
                       disabled
                       style={{ background: '#f3f4f6', cursor: 'not-allowed' }}
+                      className={validationErrors.category ? 'error' : ''}
                     />
                   ) : (
                     <select
@@ -805,12 +916,16 @@ const Products = () => {
                       value={formData.category}
                       onChange={handleInputChange}
                       required
+                      className={validationErrors.category ? 'error' : ''}
                     >
                       <option value="">Select a category</option>
                       {categories.map(cat => (
                         <option key={cat._id} value={cat._id}>{cat.name}</option>
                       ))}
                     </select>
+                  )}
+                  {validationErrors.category && (
+                    <small className="form-error">{validationErrors.category}</small>
                   )}
                 </div>
               </div>
@@ -912,7 +1027,7 @@ const Products = () => {
                   </div>
                 )}
                 {!imagePreview && (
-                  <div className="image-upload">
+                  <div className={`image-upload ${validationErrors.image ? 'error-border' : ''}`}>
                     <label className="upload-label">
                       <FiImage />
                       <span>Choose Image</span>
@@ -921,10 +1036,12 @@ const Products = () => {
                         accept="image/*"
                         onChange={handleImageChange}
                         style={{ display: 'none' }}
-                        required={!editingProduct}
                       />
                     </label>
                   </div>
+                )}
+                {validationErrors.image && (
+                  <small className="form-error">{validationErrors.image}</small>
                 )}
               </div>
 

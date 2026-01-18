@@ -109,10 +109,62 @@ MONGODB_URI=mongodb://localhost:27017/idream
    npm run dev
    ```
 
+## Installing MongoDB Shell (mongosh)
+
+If you need to connect to MongoDB via command line, you'll need to install `mongosh`:
+
+### Windows Installation Options:
+
+**Option 1: Using winget (Windows Package Manager)**
+```powershell
+winget install MongoDB.Shell
+```
+
+**Option 2: Manual Download**
+1. Go to https://www.mongodb.com/try/download/shell
+2. Select:
+   - Version: Latest
+   - Platform: Windows
+   - Package: MSI
+3. Download and run the installer
+4. Follow the installation wizard
+5. After installation, restart your terminal/PowerShell
+
+**Option 3: Using npm (if you have Node.js)**
+```powershell
+npm install -g mongosh
+```
+
+**Option 4: Using Chocolatey (if installed)**
+```powershell
+choco install mongosh
+```
+
+### Verify Installation:
+```powershell
+mongosh --version
+```
+
+### Connect to MongoDB:
+```powershell
+# Connect to local MongoDB
+mongosh mongodb://localhost:27017/idream
+
+# Or just connect and switch database
+mongosh
+use idream
+```
+
+### Alternative: Use MongoDB Compass (GUI)
+If you prefer a graphical interface:
+- Download from: https://www.mongodb.com/try/download/compass
+- Install and connect using: `mongodb://localhost:27017/idream`
+
 ## Troubleshooting:
 
 - **Connection refused**: Make sure MongoDB is running
 - **Authentication failed**: Check username/password in connection string
 - **Network access denied**: Whitelist your IP in MongoDB Atlas
 - **Port 27017 in use**: Another MongoDB instance might be running
+- **mongosh not recognized**: Install MongoDB Shell (see above) or restart your terminal after installation
 

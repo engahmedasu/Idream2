@@ -707,11 +707,11 @@ JWT_SECRET=your-super-secret-jwt-key-change-in-production
 # Server Port
 PORT=5000
 
-# Email Configuration (for OTP)
-EMAIL_HOST=smtp.gmail.com
+# Email Configuration (for OTP - Zoho Mail)
+EMAIL_HOST=smtp.zoho.com
 EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+EMAIL_USER=your-email@zoho.com
+EMAIL_PASS=your-password
 EMAIL_FROM=noreply@idreamegypt.com
 ```
 

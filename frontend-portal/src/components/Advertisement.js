@@ -3,7 +3,7 @@ import { useAdvertisement } from '../context/AdvertisementContext';
 import getImageUrl from '../utils/imageUrl';
 import './Advertisement.css';
 
-const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
+const Advertisement = ({ categoryId, side, autoPlayInterval = 5000, home = false }) => {
   const { fetchAdvertisements } = useAdvertisement();
   const [advertisements, setAdvertisements] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,29 +30,32 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
     });
   }, [advertisements]);
 
-  // Load advertisements only once per page load (on mount)
+  // Load advertisements when categoryId, side, or home changes
   useEffect(() => {
-    // Only load if we haven't loaded for this side yet
-    if (hasLoadedRef.current) {
-      return; // Already loaded, don't reload
+    // Create a unique key for this category-side-home combination
+    const loadKey = home ? `home-${side}` : `${categoryId || 'all'}-${side}`;
+    
+    // Only reload if the category, side, or home flag has changed
+    if (hasLoadedRef.current === loadKey) {
+      return; // Already loaded for this combination, don't reload
     }
 
     const loadAdvertisements = async () => {
       try {
         setLoading(true);
-        // Fetch advertisements for this side (categoryId is ignored after first load)
-        const ads = await fetchAdvertisements(categoryId, side);
+        // Fetch advertisements filtered by category/home and side
+        const ads = await fetchAdvertisements(categoryId, side, home);
         
         // Always set the ads, even if empty (to show that loading is complete)
         setAdvertisements(ads || []);
         setCurrentIndex(0);
         setIsTransitioning(true);
         isLoopingRef.current = false; // Reset looping state
-        hasLoadedRef.current = true; // Mark as loaded
+        hasLoadedRef.current = loadKey; // Mark this combination as loaded
       } catch (error) {
-        console.error(`Error loading advertisements for ${side} side:`, error);
+        console.error(`Error loading advertisements for ${side} side (home: ${home}, category: ${categoryId}):`, error);
         setAdvertisements([]);
-        hasLoadedRef.current = true; // Mark as loaded even on error to prevent retries
+        hasLoadedRef.current = loadKey; // Mark as loaded even on error to prevent retries
       } finally {
         setLoading(false);
       }
@@ -60,7 +63,7 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
 
     loadAdvertisements();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array - only run once on mount
+  }, [categoryId, side, home]); // Re-run when categoryId, side, or home changes
 
   // Update slider position
   useEffect(() => {
@@ -261,7 +264,7 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
                     alt={ad.redirectUrl ? `Advertisement - ${ad.redirectUrl}` : 'Advertisement'} 
                     className="advertisement-image"
                     loading="eager"
-                    fetchPriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
+                    fetchpriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
                     onError={(e) => {
                       // Hide broken images
                       e.target.style.display = 'none';
@@ -301,11 +304,5 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
   );
 };
 
-// Memoize component to prevent unnecessary re-renders
-// Compare props to determine if re-render is needed
-export default React.memo(Advertisement, (prevProps, nextProps) => {
-  // Only re-render if side or categoryId changes
-  return prevProps.side === nextProps.side && 
-         prevProps.categoryId === nextProps.categoryId &&
-         prevProps.autoPlayInterval === nextProps.autoPlayInterval;
-});
+// Export component - memoization is handled internally via useEffect dependencies
+export default Advertisement;

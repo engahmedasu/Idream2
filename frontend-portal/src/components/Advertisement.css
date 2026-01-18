@@ -15,6 +15,15 @@
   overflow: hidden;
 }
 
+/* Add side-specific classes for mobile targeting */
+.advertisement-container.advertisement-left {
+  /* Desktop: left side positioning already set */
+}
+
+.advertisement-container.advertisement-right {
+  /* Desktop: right side positioning already set */
+}
+
 .advertisement-slider-wrapper {
   width: 100%;
   flex: 1;
@@ -53,7 +62,7 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
   margin: 0;
   padding: 0;
@@ -61,7 +70,7 @@
   user-select: none;
   -webkit-user-drag: none;
   background: #f3f4f6; /* Fallback background while loading */
-  min-height: 100%; /* Ensure it fills the container */
+  /* Maintain aspect ratio - image will fit within container while preserving its natural proportions */
 }
 
 /* Responsive styles */
@@ -83,10 +92,46 @@
   }
 }
 
-/* Hide advertisements on tablets and mobile */
+/* Mobile styles - reposition advertisements */
 @media (max-width: 768px) {
-  .advertisement-container {
-    display: none;
+  /* Desktop positioning - hide side advertisements */
+  .advertisement-container.advertisement-left,
+  .advertisement-container.advertisement-right {
+    position: relative;
+    top: auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 200px;
+    max-height: 300px;
+    margin: 1.5rem 0;
+    padding: 0;
+    flex-shrink: 1;
+  }
+
+  .advertisement-slider-wrapper {
+    height: 250px;
+    min-height: 200px;
+  }
+
+  .advertisement-slider {
+    height: 100%;
+  }
+
+  .advertisement-slide {
+    height: 100%;
+  }
+
+  .advertisement-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Hide indicators on mobile or make them more subtle */
+  .advertisement-indicators {
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
   }
 }
 

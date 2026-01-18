@@ -42,13 +42,16 @@ transporter.verify((error, success) => {
     );
     
     if (isAuthError) {
-      console.error('\n📧 Gmail Authentication Error:');
-      console.error('   1. Make sure you have 2-Factor Authentication enabled on your Gmail account');
-      console.error('   2. Generate an App Password: https://myaccount.google.com/apppasswords');
-      console.error('   3. Use the App Password (not your regular password) in EMAIL_PASS');
-      console.error('   4. Make sure EMAIL_USER is your full Gmail address (e.g., yourname@gmail.com)');
-      console.error('   5. Check for extra spaces or quotes in your .env file');
-      console.error('   6. App Password should be exactly 16 characters (no spaces)');
+      console.error('\n📧 Zoho Email Authentication Error:');
+      console.error('   1. Make sure EMAIL_USER is your full Zoho email address (e.g., yourname@zoho.com)');
+      console.error('   2. Use your Zoho account password or App Password in EMAIL_PASS');
+      console.error('   3. If 2FA is enabled, generate an App Password from Zoho Account settings');
+      console.error('   4. Check for extra spaces or quotes in your .env file');
+      console.error('   5. Verify EMAIL_HOST matches your Zoho region:');
+      console.error('      - smtp.zoho.com (US/Global)');
+      console.error('      - smtp.zoho.eu (Europe)');
+      console.error('      - smtp.zoho.in (India)');
+      console.error('      - smtp.zoho.com.au (Australia)');
       console.error('\n🔍 Current Configuration:');
       console.error(`   EMAIL_USER: ${config.email.user ? `"${config.email.user}" (${config.email.user.length} chars)` : '❌ NOT SET'}`);
       console.error(`   EMAIL_PASS: ${config.email.password ? `"${'*'.repeat(config.email.password.length)}" (${config.email.password.length} chars)` : '❌ NOT SET'}`);
@@ -56,11 +59,8 @@ transporter.verify((error, success) => {
       console.error(`   EMAIL_PORT: ${config.email.port}`);
       
       // Additional checks
-      if (config.email.password && config.email.password.length !== 16) {
-        console.error('\n⚠️  WARNING: App Password should be 16 characters. Current length:', config.email.password.length);
-      }
-      if (config.email.user && !config.email.user.includes('@gmail.com')) {
-        console.error('\n⚠️  WARNING: EMAIL_USER should be a Gmail address');
+      if (config.email.user && !config.email.user.includes('@zoho')) {
+        console.error('\n⚠️  WARNING: EMAIL_USER should be a Zoho email address (e.g., yourname@zoho.com, yourname@zoho.eu)');
       }
     }
   } else {
@@ -106,7 +106,7 @@ exports.sendOTPEmail = async (email, otp) => {
     ];
     
     if (authErrors.some(pattern => error.message.includes(pattern)) || error.code === 'EAUTH') {
-      throw new Error('Gmail authentication failed. Please check your EMAIL_USER and EMAIL_PASS in .env file. You may need to use an App Password instead of your regular password. Make sure 2-Factor Authentication is enabled and you\'ve generated an App Password from https://myaccount.google.com/apppasswords');
+      throw new Error('Zoho email authentication failed. Please check your EMAIL_USER and EMAIL_PASS in .env file. Make sure EMAIL_USER is your full Zoho email address. If 2FA is enabled, use an App Password from your Zoho Account settings. Also verify EMAIL_HOST matches your Zoho region (smtp.zoho.com, smtp.zoho.eu, smtp.zoho.in, or smtp.zoho.com.au).');
     }
     
     throw error;

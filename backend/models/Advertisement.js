@@ -19,6 +19,10 @@ const advertisementSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  showInHome: {
+    type: Boolean,
+    default: false
+  },
   startDate: {
     type: Date,
     default: null

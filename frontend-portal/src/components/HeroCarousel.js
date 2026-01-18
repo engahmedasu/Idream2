@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import getImageUrl from '../utils/imageUrl';
+import formatCurrency from '../utils/formatCurrency';
 import './HeroCarousel.css';
 
 const HeroCarousel = ({ categoryId }) => {
@@ -48,7 +49,7 @@ const HeroCarousel = ({ categoryId }) => {
         </div>
         <div className="carousel-content">
           <h2>{currentOffer.name}</h2>
-          <p className="carousel-price">${currentOffer.price}</p>
+          <p className="carousel-price">{formatCurrency(currentOffer.price)}</p>
           <span className="hot-offer-badge">Hot Offer</span>
         </div>
       </Link>

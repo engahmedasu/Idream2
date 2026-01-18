@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import formatCurrency from '../utils/formatCurrency';
 import { toast } from 'react-toastify';
 import './ProductDetail.css';
 
@@ -117,7 +118,7 @@ const ProductDetail = () => {
 
           <div className="product-info-section">
             <h1>{product.name}</h1>
-            <p className="product-price">${product.price}</p>
+            <p className="product-price">{formatCurrency(product.price)}</p>
             {product.isHotOffer && <span className="hot-badge">Hot Offer</span>}
 
             <div className="product-shop-info">

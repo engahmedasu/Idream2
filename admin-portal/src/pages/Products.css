@@ -610,6 +610,41 @@
   gap: 0.5rem;
 }
 
+.form-error {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #DC2626;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+  border-color: #DC2626;
+}
+
+.form-group input.error:focus,
+.form-group textarea.error:focus,
+.form-group select.error:focus {
+  border-color: #DC2626;
+  outline-color: #DC2626;
+}
+
+.image-upload.error-border {
+  border: 2px dashed #DC2626 !important;
+}
+
+.image-upload.error-border .upload-label {
+  border-color: #DC2626;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;

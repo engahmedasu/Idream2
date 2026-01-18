@@ -96,7 +96,7 @@ function AppRoutes() {
         <Route 
           path="categories" 
           element={
-            <RoleProtectedRoute allowedRoles={['superAdmin', 'mallAdmin']}>
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
               <Categories />
             </RoleProtectedRoute>
           } 
@@ -136,7 +136,7 @@ function AppRoutes() {
         <Route 
           path="subscription-plans" 
           element={
-            <RoleProtectedRoute allowedRoles={['superAdmin', 'mallAdmin']}>
+            <RoleProtectedRoute allowedRoles={['superAdmin']}>
               <SubscriptionPlans />
             </RoleProtectedRoute>
           } 

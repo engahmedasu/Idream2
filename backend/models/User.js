@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema({
     ref: 'Shop',
     default: null
   },
+  allowedCategories: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Category',
+    default: []
+  },
   isActive: {
     type: Boolean,
     default: true

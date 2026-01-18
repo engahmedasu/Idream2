@@ -113,26 +113,28 @@ Edit each `.env.dev` and `.env.prod` file (or `.env` if using legacy approach) w
 
 6. **EMAIL_HOST**
    - SMTP server hostname
-   - Gmail: `smtp.gmail.com`
+   - Zoho (US/Global): `smtp.zoho.com`
+   - Zoho (Europe): `smtp.zoho.eu`
+   - Zoho (India): `smtp.zoho.in`
+   - Zoho (Australia): `smtp.zoho.com.au`
    - Mailgun: `smtp.mailgun.org`
    - SendGrid: `smtp.sendgrid.net`
-   - Default: `smtp.gmail.com`
+   - Default: `smtp.zoho.com`
 
 7. **EMAIL_PORT**
    - SMTP server port
-   - TLS: `587`
+   - TLS: `587` (recommended)
    - SSL: `465`
    - Default: `587`
 
 8. **EMAIL_USER**
    - SMTP account username (usually full email address)
-   - Example: `yourname@gmail.com`
+   - Example: `yourname@zoho.com`, `yourname@zoho.eu`, `yourname@zoho.in`
 
 9. **EMAIL_PASS**
    - SMTP account password
-   - **For Gmail**: Use an App Password (not your regular password)
-   - Generate App Password: https://myaccount.google.com/apppasswords
-   - Requires 2-Factor Authentication to be enabled
+   - **For Zoho**: Use your Zoho account password or App Password (if 2FA is enabled)
+   - If 2FA is enabled, generate App Password from Zoho Account settings
 
 ### Frontend Portal (.env)
 
@@ -179,7 +181,7 @@ Edit each `.env.dev` and `.env.prod` file (or `.env` if using legacy approach) w
 - Use Let's Encrypt for free SSL certificates
 
 ### 5. Email Configuration
-- Use app-specific passwords for Gmail
+- Use Zoho email for notifications (smtp.zoho.com or regional variant)
 - Enable 2FA on email accounts
 - Consider using dedicated email service (SendGrid, Mailgun)
 
@@ -244,10 +246,10 @@ PORT=5000
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/idream?retryWrites=true&w=majority
 JWT_SECRET=<generated-64-character-random-string>
 JWT_EXPIRE=7d
-EMAIL_HOST=smtp.gmail.com
+EMAIL_HOST=smtp.zoho.com
 EMAIL_PORT=587
-EMAIL_USER=noreply@idreamegypt.com
-EMAIL_PASS=<gmail-app-password>
+EMAIL_USER=noreply@zoho.com
+EMAIL_PASS=<zoho-password>
 ```
 
 **frontend-portal/.env:**

@@ -19,6 +19,7 @@ exports.getAllUsers = async (req, res) => {
     const users = await User.find(filter)
       .populate('role', 'name')
       .populate('shop', 'name')
+      .populate('allowedCategories', 'name')
       .populate('createdBy', 'email')
       .populate('updatedBy', 'email')
       .select('-password')
@@ -36,6 +37,7 @@ exports.getUserById = async (req, res) => {
     const user = await User.findById(req.params.id)
       .populate('role')
       .populate('shop')
+      .populate('allowedCategories', 'name')
       .populate('createdBy', 'email')
       .populate('updatedBy', 'email')
       .select('-password');
@@ -68,7 +70,7 @@ exports.createUser = async (req, res) => {
     }
 
     const user = await User.create(userData);
-    await user.populate('role shop');
+    await user.populate('role shop allowedCategories');
 
     res.status(201).json({
       ...user.toObject(),
@@ -104,6 +106,13 @@ exports.updateUser = async (req, res) => {
       updateData.shop = null;
     }
 
+    // Handle allowedCategories field: ensure it's an array or empty array
+    if (updateData.allowedCategories !== undefined) {
+      if (!Array.isArray(updateData.allowedCategories)) {
+        updateData.allowedCategories = updateData.allowedCategories ? [updateData.allowedCategories] : [];
+      }
+    }
+
     // Update other fields (excluding password which is handled above)
     const { password, ...otherFields } = updateData;
     Object.assign(user, otherFields);
@@ -111,7 +120,7 @@ exports.updateUser = async (req, res) => {
     // Save user (this will trigger password hashing if password was modified)
     await user.save();
 
-    await user.populate('role shop');
+    await user.populate('role shop allowedCategories');
     
     res.json({
       ...user.toObject(),
@@ -148,7 +157,7 @@ exports.toggleUser = async (req, res) => {
     user.updatedBy = req.user._id;
     await user.save();
 
-    await user.populate('role shop');
+    await user.populate('role shop allowedCategories');
     res.json({
       ...user.toObject(),
       password: undefined

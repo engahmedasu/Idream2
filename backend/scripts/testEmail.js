@@ -9,7 +9,7 @@ console.log('='.repeat(50));
 
 // Check if environment variables are loaded
 console.log('\n1. Environment Variables Check:');
-console.log('   EMAIL_HOST:', process.env.EMAIL_HOST || '❌ NOT SET (defaults to smtp.gmail.com)');
+console.log('   EMAIL_HOST:', process.env.EMAIL_HOST || '❌ NOT SET (defaults to smtp.zoho.com)');
 console.log('   EMAIL_PORT:', process.env.EMAIL_PORT || '❌ NOT SET (defaults to 587)');
 console.log('   EMAIL_USER:', process.env.EMAIL_USER ? `✅ ${process.env.EMAIL_USER}` : '❌ NOT SET');
 console.log('   EMAIL_PASS:', process.env.EMAIL_PASS ? `✅ ${'*'.repeat(process.env.EMAIL_PASS.length)} (${process.env.EMAIL_PASS.length} chars)` : '❌ NOT SET');
@@ -19,19 +19,22 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.log('\n📝 Setup Instructions:');
   console.log('   1. Create a file named .env in the backend/ directory');
   console.log('   2. Add the following lines:');
-  console.log('      EMAIL_USER=your-email@gmail.com');
-  console.log('      EMAIL_PASS=your-app-password-here');
-  console.log('      EMAIL_HOST=smtp.gmail.com');
+  console.log('      EMAIL_USER=your-email@zoho.com');
+  console.log('      EMAIL_PASS=your-password-here');
+  console.log('      EMAIL_HOST=smtp.zoho.com');
   console.log('      EMAIL_PORT=587');
-  console.log('\n🔐 How to get Gmail App Password:');
-  console.log('   1. Go to: https://myaccount.google.com/security');
-  console.log('   2. Enable 2-Step Verification (if not already enabled)');
-  console.log('   3. Go to: https://myaccount.google.com/apppasswords');
-  console.log('   4. Select "Mail" and "Other (Custom name)"');
-  console.log('   5. Enter name: "iDream Portal"');
-  console.log('   6. Click "Generate"');
-  console.log('   7. Copy the 16-character password (no spaces)');
-  console.log('   8. Paste it in EMAIL_PASS in your .env file');
+  console.log('\n🔐 Zoho Email Setup:');
+  console.log('   • EMAIL_USER: Your full Zoho email address');
+  console.log('   • EMAIL_PASS: Your Zoho account password');
+  console.log('   • If 2FA is enabled, use an App Password from Zoho Account settings');
+  console.log('\n📧 Zoho SMTP Host by Region:');
+  console.log('   • US/Global: smtp.zoho.com');
+  console.log('   • Europe: smtp.zoho.eu');
+  console.log('   • India: smtp.zoho.in');
+  console.log('   • Australia: smtp.zoho.com.au');
+  console.log('\n🔧 Port Options:');
+  console.log('   • 587 (TLS/STARTTLS) - Recommended, set secure=false');
+  console.log('   • 465 (SSL) - Alternative, set secure=true');
   process.exit(1);
 }
 
@@ -39,9 +42,9 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  host: process.env.EMAIL_HOST || 'smtp.zoho.com',
   port: parseInt(process.env.EMAIL_PORT) || 587,
-  secure: false,
+  secure: process.env.EMAIL_PORT === '465', // true for 465, false for 587
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -59,11 +62,11 @@ transporter.verify((error, success) => {
     
     if (error.message.includes('BadCredentials') || error.message.includes('Username and Password not accepted')) {
       console.log('\n   🔧 Troubleshooting:');
-      console.log('      • Make sure you\'re using an App Password, not your regular Gmail password');
-      console.log('      • App Passwords are 16 characters long (no spaces)');
-      console.log('      • Make sure EMAIL_USER is your full Gmail address');
-      console.log('      • Verify 2-Step Verification is enabled');
-      console.log('      • Try generating a new App Password');
+      console.log('      • Make sure EMAIL_USER is your full Zoho email address (e.g., yourname@zoho.com)');
+      console.log('      • Verify EMAIL_PASS is your correct Zoho account password');
+      console.log('      • If 2FA is enabled, use an App Password from Zoho Account settings');
+      console.log('      • Check that EMAIL_HOST matches your Zoho region (smtp.zoho.com, smtp.zoho.eu, etc.)');
+      console.log('      • Verify EMAIL_PORT is correct (587 for TLS, 465 for SSL)');
     } else if (error.code === 'EAUTH') {
       console.log('\n   🔧 Troubleshooting:');
       console.log('      • Check that EMAIL_USER and EMAIL_PASS are correct');

@@ -230,7 +230,7 @@ const Home = () => {
     <div className="home">
       <div className="home-wrapper">
         {/* Left Advertisement */}
-        <Advertisement categoryId={firstCategory?._id} side="left" />
+        <Advertisement home={true} side="left" />
         
         <div className="home-container">
         {/* Video Banner Section */}
@@ -247,6 +247,11 @@ const Home = () => {
             )}
           </section>
         )}
+
+        {/* Left Advertisement - Mobile Only */}
+        <div className="advertisement-mobile advertisement-mobile-left">
+          <Advertisement home={true} side="left" />
+        </div>
 
         {/* Hot Offers Section */}
         {hotOffers.length > 0 && (
@@ -371,6 +376,11 @@ const Home = () => {
           </section>
         )}
 
+        {/* Right Advertisement - Mobile Only */}
+        <div className="advertisement-mobile advertisement-mobile-right">
+          <Advertisement home={true} side="right" />
+        </div>
+
         {/* Shops Grid */}
         {!searchQuery && (
           <section className="shops-section">
@@ -451,7 +461,7 @@ const Home = () => {
         </div>
         
         {/* Right Advertisement */}
-        <Advertisement key="ad-right" categoryId={firstCategory?._id} side="right" />
+        <Advertisement key="ad-right" home={true} side="right" />
       </div>
     </div>
   );

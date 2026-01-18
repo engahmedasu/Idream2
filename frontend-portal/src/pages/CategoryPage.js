@@ -227,6 +227,11 @@ const CategoryPage = () => {
           )}
         </section>
 
+        {/* Left Advertisement - Mobile Only */}
+        <div className="advertisement-mobile advertisement-mobile-left">
+          <Advertisement categoryId={id} side="left" />
+        </div>
+
         {/* Hot Offers Section */}
         {categoryHotOffers && categoryHotOffers.length > 0 && (
           <section className="hot-offers-section">
@@ -346,6 +351,11 @@ const CategoryPage = () => {
             )}
           </section>
         )}
+
+        {/* Right Advertisement - Mobile Only */}
+        <div className="advertisement-mobile advertisement-mobile-right">
+          <Advertisement categoryId={id} side="right" />
+        </div>
 
         {/* Shops Grid */}
         {shops && shops.length > 0 && (

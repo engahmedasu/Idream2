@@ -10,14 +10,15 @@ const auth = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'test-secret-key-for-jwt');
-    // Populate role and its permissions
+    // Populate role and its permissions, and allowedCategories for MallAdmin
     const user = await User.findById(decoded.id)
       .populate({
         path: 'role',
         populate: {
           path: 'permissions'
         }
-      });
+      })
+      .populate('allowedCategories');
     
     if (!user || !user.isActive) {
       return res.status(401).json({ message: 'User not found or inactive' });
@@ -37,14 +38,15 @@ const optionalAuth = async (req, res, next) => {
     
     if (token) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'test-secret-key-for-jwt');
-      // Populate role and its permissions
+      // Populate role and its permissions, and allowedCategories for MallAdmin
       const user = await User.findById(decoded.id)
         .populate({
           path: 'role',
           populate: {
             path: 'permissions'
           }
-        });
+        })
+        .populate('allowedCategories');
       
       if (user && user.isActive) {
         req.user = user;

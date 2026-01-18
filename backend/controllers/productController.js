@@ -82,15 +82,28 @@ exports.getAllProducts = async (req, res) => {
     if (req.user && req.user.role?.name === 'shopAdmin' && req.user.shop) {
       filter.shop = req.user.shop;
     } 
-    // If user is mallAdmin, restrict to products from shops they created
+    // If user is mallAdmin, restrict to products from shops in allowedCategories or shops they created
     else if (req.user && req.user.role?.name === 'mallAdmin') {
-      const userShops = await Shop.find({ createdBy: req.user._id }).select('_id');
-      const shopIds = userShops.map(s => s._id);
-      if (shopIds.length > 0) {
-        filter.shop = { $in: shopIds };
+      // If mallAdmin has allowedCategories defined, use those
+      if (req.user.allowedCategories && req.user.allowedCategories.length > 0) {
+        const categoryIds = req.user.allowedCategories.map(cat => cat._id || cat);
+        // Get shops in these categories
+        const userShops = await Shop.find({ category: { $in: categoryIds } }).select('_id');
+        const shopIds = userShops.map(s => s._id);
+        if (shopIds.length > 0) {
+          filter.shop = { $in: shopIds };
+        } else {
+          filter.shop = { $in: [] };
+        }
       } else {
-        // If mallAdmin has no shops, return empty array
-        filter.shop = { $in: [] };
+        // Fallback to shops they created (for backward compatibility)
+        const userShops = await Shop.find({ createdBy: req.user._id }).select('_id');
+        const shopIds = userShops.map(s => s._id);
+        if (shopIds.length > 0) {
+          filter.shop = { $in: shopIds };
+        } else {
+          filter.shop = { $in: [] };
+        }
       }
     } 
     else if (shop) {
@@ -169,13 +182,18 @@ exports.getProductById = async (req, res) => {
 
     // If user is shopAdmin, ensure they can only access their shop's products
     if (req.user && req.user.role?.name === 'shopAdmin' && req.user.shop) {
-      if (product.shop._id.toString() !== req.user.shop.toString()) {
+      const shopId = product.shop?._id || product.shop;
+      if (!shopId || shopId.toString() !== req.user.shop.toString()) {
         return res.status(403).json({ message: 'Access denied. You can only access products from your shop.' });
       }
     }
     // If user is mallAdmin, ensure they can only access products from shops they created
     else if (req.user && req.user.role?.name === 'mallAdmin') {
-      const shop = await Shop.findById(product.shop._id || product.shop);
+      const shopId = product.shop?._id || product.shop;
+      if (!shopId) {
+        return res.status(400).json({ message: 'Product shop not found' });
+      }
+      const shop = await Shop.findById(shopId);
       if (!shop || shop.createdBy.toString() !== req.user._id.toString()) {
         return res.status(403).json({ message: 'Access denied. You can only access products from shops you created.' });
       }
@@ -218,6 +236,39 @@ exports.createProduct = async (req, res) => {
       shop: req.body.shop || req.user.shop,
       createdBy: req.user._id
     };
+
+    // Validate required fields
+    const validationErrors = [];
+    
+    if (!productData.name || !productData.name.trim()) {
+      validationErrors.push('Product name is required');
+    }
+    
+    if (!productData.description || !productData.description.trim()) {
+      validationErrors.push('Product description is required');
+    }
+    
+    if (!productData.image || !productData.image.trim()) {
+      validationErrors.push('Product image is required');
+    }
+    
+    if (!productData.price || productData.price === '' || isNaN(productData.price) || parseFloat(productData.price) <= 0) {
+      validationErrors.push('Product price is required and must be greater than 0');
+    }
+    
+    if (!productData.shop) {
+      validationErrors.push('Shop is required');
+    }
+    
+    if (!productData.category) {
+      validationErrors.push('Category is required');
+    }
+    
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ 
+        message: validationErrors.join('. ')
+      });
+    }
 
     // Convert priority to number if provided
     if (productData.priority !== undefined) {
@@ -386,6 +437,39 @@ exports.updateProduct = async (req, res) => {
       updatedBy: req.user._id
     };
 
+    // Validate required fields if they are being updated
+    const validationErrors = [];
+    
+    // Only validate if the field is provided in the update
+    if (updateData.name !== undefined && (!updateData.name || !updateData.name.trim())) {
+      validationErrors.push('Product name is required');
+    }
+    
+    if (updateData.description !== undefined && (!updateData.description || !updateData.description.trim())) {
+      validationErrors.push('Product description is required');
+    }
+    
+    if (updateData.price !== undefined) {
+      const priceValue = parseFloat(updateData.price);
+      if (isNaN(priceValue) || priceValue <= 0) {
+        validationErrors.push('Product price must be greater than 0');
+      }
+    }
+    
+    if (updateData.shop !== undefined && !updateData.shop) {
+      validationErrors.push('Shop is required');
+    }
+    
+    if (updateData.category !== undefined && !updateData.category) {
+      validationErrors.push('Category is required');
+    }
+    
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ 
+        message: validationErrors.join('. ')
+      });
+    }
+
     // Convert priority to number if provided
     if (updateData.priority !== undefined) {
       updateData.priority = parseInt(updateData.priority) || 0;
@@ -406,8 +490,9 @@ exports.updateProduct = async (req, res) => {
       const rating = parseFloat(updateData.averageRating);
       if (!isNaN(rating) && rating >= 0 && rating <= 5) {
         updateData.averageRating = rating;
-        // Set totalReviews to 1 if rating is manually set and no reviews exist
-        if (!updateData.totalReviews && (!product || product.totalReviews === 0)) {
+        // Set totalReviews to 1 if rating is manually set and totalReviews not provided
+        // Note: We'll check existing product's totalReviews after fetching it below
+        if (!updateData.totalReviews) {
           updateData.totalReviews = 1;
         }
       } else {
@@ -456,6 +541,17 @@ exports.updateProduct = async (req, res) => {
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Validate image - required if being removed and no existing image
+    // Check if image is being explicitly set to empty/removed (req.body.image === '' or updateData.image === '')
+    // and there's no new file being uploaded and no existing image
+    if ((req.body.image === '' || (updateData.image === '' && !req.file)) && !product.image) {
+      const validationErrors = [];
+      validationErrors.push('Product image is required');
+      return res.status(400).json({ 
+        message: validationErrors.join('. ')
+      });
     }
 
     // Check hot offer limit if setting to hot offer - count only active AND approved hot offers
