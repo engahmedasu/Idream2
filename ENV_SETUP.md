@@ -8,6 +8,8 @@ This guide explains how to configure environment variables for the iDream platfo
 
 ## 📁 Files Overview
 
+
+
 ### Template Files
 
 - `backend/.env.dev.example` - Backend development environment template
