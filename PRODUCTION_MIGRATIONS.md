@@ -52,6 +52,9 @@ npm run add-website-to-shops
 
 # Migrate pages collection (if pages feature was added)
 npm run migrate-pages
+
+# Add allowedCategories field to User model (for MallAdmin category restrictions)
+npm run add-allowed-categories-to-users
 ```
 
 ### 3. New Feature Migrations (Recent Additions)
@@ -65,8 +68,11 @@ npm run migrate-contact-requests
 # Migrate requests collection (Join Our Team, New Ideas, Hire Expert)
 npm run migrate-requests
 
-# Migrate advertisements collection (NEW - Advertisement Area Feature)
+# Migrate advertisements collection (Advertisement Area Feature)
 npm run migrate-advertisements
+
+# Add allowedCategories field to User model (MallAdmin category restrictions - LATEST)
+npm run add-allowed-categories-to-users
 ```
 
 ### 4. Data Integrity Migrations
@@ -122,6 +128,7 @@ npm run migrate-pages
 npm run migrate-contact-requests
 npm run migrate-requests
 npm run migrate-advertisements
+npm run add-allowed-categories-to-users
 
 # 4. Data Integrity
 npm run migrate-order-log-order-number
@@ -134,10 +141,18 @@ If you're just adding new features to an existing production database:
 
 ```bash
 # Only run the new feature migrations
-npm run migrate-advertisements  # NEW: Advertisement Area Feature
+npm run migrate-advertisements  # Advertisement Area Feature
+npm run add-allowed-categories-to-users  # LATEST: MallAdmin category restrictions
 ```
 
 ## Migration Scripts Details
+
+### add-allowed-categories-to-users
+- **Purpose**: Adds `allowedCategories` field to User model for MallAdmin category restrictions
+- **When to Run**: When deploying the MallAdmin category restriction feature
+- **Impact**: Adds new field to existing User documents (sets to empty array `[]`)
+- **Safe to Re-run**: Yes (idempotent)
+- **Description**: This migration adds the `allowedCategories` field to all User documents. Existing users will have an empty array `[]`, while new MallAdmin users can have categories assigned via the Admin Portal. This enables category-based access control for MallAdmin users.
 
 ### migrate-advertisements
 - **Purpose**: Creates advertisements collection and indexes
@@ -205,21 +220,21 @@ After running migrations:
 
 ```bash
 cd backend
-npm run migrate-advertisements
+npm run add-allowed-categories-to-users  # Latest migration
 ```
 
 ### Direct Node execution
 
 ```bash
 cd backend
-node scripts/migrateAdvertisementsCollection.js
+node scripts/addAllowedCategoriesToUsers.js
 ```
 
 ### With environment variables
 
 ```bash
 cd backend
-MONGODB_URI="mongodb://your-production-uri" node scripts/migrateAdvertisementsCollection.js
+MONGODB_URI="mongodb://your-production-uri" node scripts/addAllowedCategoriesToUsers.js
 ```
 
 ## Troubleshooting
