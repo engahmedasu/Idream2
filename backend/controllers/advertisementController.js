@@ -66,11 +66,12 @@ exports.getActiveAdvertisements = async (req, res) => {
       ]
     };
 
-    // If home=true is passed, filter by showInHome flag
+    // If home=true is passed, filter by showInHome flag (only show ads marked for home)
     if (home === 'true') {
       filter.showInHome = true;
     }
 
+    // If category is provided, filter by category (link advertisements to categories)
     if (category) {
       filter.categories = { $in: [category] };
     }
@@ -82,11 +83,30 @@ exports.getActiveAdvertisements = async (req, res) => {
       .populate('categories', 'name')
       .sort({ priority: -1, createdAt: -1 });
 
-    // Transform image paths to full URLs
-    const transformedAds = advertisements.map(ad => ({
-      ...ad.toObject(),
-      image: getImageUrl(ad.image)
-    }));
+    // Transform image paths to full URLs and verify files exist
+    const transformedAds = advertisements
+      .map(ad => {
+        const adObj = ad.toObject();
+        let imagePath = getImageUrl(adObj.image);
+        
+        // Verify file exists if it's a local path
+        if (imagePath && !imagePath.startsWith('http://') && !imagePath.startsWith('https://')) {
+          // Remove leading slash for path.join to work correctly
+          const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+          const filePath = path.join(__dirname, '..', cleanPath);
+          if (!fs.existsSync(filePath)) {
+            console.warn(`Advertisement image not found: ${filePath} for ad ${adObj._id}`);
+            // Return null to filter out this ad
+            return null;
+          }
+        }
+        
+        return {
+          ...adObj,
+          image: imagePath
+        };
+      })
+      .filter(ad => ad !== null && ad.image); // Only return ads with valid images
 
     res.json(transformedAds);
   } catch (error) {

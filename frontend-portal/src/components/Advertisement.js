@@ -3,17 +3,19 @@ import { useAdvertisement } from '../context/AdvertisementContext';
 import getImageUrl from '../utils/imageUrl';
 import './Advertisement.css';
 
-const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
-  const { fetchAdvertisements } = useAdvertisement();
+const Advertisement = ({ categoryId, side, home = false, autoPlayInterval = 5000 }) => {
+  const { fetchAdvertisements } = useAdvertisement(home ? true : false);
   const [advertisements, setAdvertisements] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(true);
+  const [sliderTransform, setSliderTransform] = useState('translateX(0%)'); // Track transform in state
   const intervalRef = useRef(null);
   const sliderRef = useRef(null);
   const hasLoadedRef = useRef(false); // Track if we've already loaded for this side
   const isLoopingRef = useRef(false); // Track if we're in a loop transition
+  const initialPositionSetRef = useRef(false); // Track if initial position has been set
 
   // Preload all advertisement images (images will load progressively)
   useEffect(() => {
@@ -40,17 +42,64 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
     const loadAdvertisements = async () => {
       try {
         setLoading(true);
-        // Fetch advertisements for this side (categoryId is ignored after first load)
-        const ads = await fetchAdvertisements(categoryId, side);
+        // Fetch advertisements for this side, filtered by showInHome when home=true
+        const ads = await fetchAdvertisements(categoryId, side, home);
         
         // Always set the ads, even if empty (to show that loading is complete)
         setAdvertisements(ads || []);
         setCurrentIndex(0);
-        setIsTransitioning(true);
+        setIsTransitioning(false); // Disable transition for initial positioning
         isLoopingRef.current = false; // Reset looping state
+        initialPositionSetRef.current = false; // Reset initial position flag
         hasLoadedRef.current = true; // Mark as loaded
+        
+        // Force initial position update after ads are loaded
+        // Use multiple requestAnimationFrame calls to ensure DOM is ready
+        if (ads && ads.length > 0) {
+          // Use a small delay to ensure state updates are applied
+          setTimeout(() => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                if (sliderRef.current && !initialPositionSetRef.current) {
+                  const totalSlides = ads.length + 2;
+                  const slideWidthPercent = 100 / totalSlides;
+                  const initialTranslateX = side === 'left' 
+                    ? -(1 * slideWidthPercent) // Position at first real slide (index 1)
+                    : -((totalSlides - 2) * slideWidthPercent); // Position at first real slide for right side
+                  
+                  const transformValue = `translateX(${initialTranslateX}%)`;
+                  
+                  // Update state first (this will persist through re-renders)
+                  setSliderTransform(transformValue);
+                  
+                  // Disable transition for initial positioning
+                  sliderRef.current.style.transition = 'none';
+                  sliderRef.current.style.transform = transformValue;
+                  initialPositionSetRef.current = true; // Mark as set
+                  
+                  // Verify transform was applied
+                  const appliedTransform = sliderRef.current.style.transform;
+                  
+                  if (!appliedTransform || appliedTransform === 'none') {
+                    // Retry immediately
+                    sliderRef.current.style.transform = transformValue;
+                  }
+                  
+                  // Re-enable transition after positioning
+                  setTimeout(() => {
+                    if (sliderRef.current) {
+                      sliderRef.current.style.transition = '';
+                      setIsTransitioning(true);
+                    }
+                  }, 100);
+                }
+              });
+            });
+          }, 10);
+        } else {
+          setIsTransitioning(true);
+        }
       } catch (error) {
-        console.error(`Error loading advertisements for ${side} side:`, error);
         setAdvertisements([]);
         hasLoadedRef.current = true; // Mark as loaded even on error to prevent retries
       } finally {
@@ -64,21 +113,32 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
 
   // Update slider position
   useEffect(() => {
+    // Skip if initial position hasn't been set yet (to avoid race condition)
+    if (!initialPositionSetRef.current && !isTransitioning) {
+      return; // Silently skip - this is expected during initial load
+    }
+    
     if (sliderRef.current && advertisements.length > 0) {
       const totalSlides = advertisements.length + 2; // +2 for duplicate slides
       const slideWidthPercent = 100 / totalSlides;
+      
+      // Calculate the transform value
+      let translateX;
       
       // If we're looping (jumping from duplicate to real slide), disable transition temporarily
       if (isLoopingRef.current) {
         // Calculate position for the real first slide (index 1 in our array with duplicates)
         // For left: index 1 is the first real slide
         // For right: index 1 is also the first real slide (but it's the last in original order)
-        const translateX = side === 'left' 
+        translateX = side === 'left' 
           ? -(1 * slideWidthPercent) // Position at first real slide (index 1)
           : -((totalSlides - 2) * slideWidthPercent); // Position at first real slide for right side
         
+        const transformValue = `translateX(${translateX}%)`;
+        setSliderTransform(transformValue); // Update state
+        
         sliderRef.current.style.transition = 'none';
-        sliderRef.current.style.transform = `translateX(${translateX}%)`;
+        sliderRef.current.style.transform = transformValue;
         
         // Re-enable transition after a brief moment
         setTimeout(() => {
@@ -95,7 +155,6 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
       // Left side: duplicate last at start (index 0), real slides (index 1-N), duplicate first at end (index N+1)
       // Right side: duplicate first at start (index 0), real slides (index 1-N), duplicate last at end (index N+1)
       let adjustedIndex;
-      let translateX;
       
       // Handle special case: currentIndex = advertisements.length means we're showing the duplicate at the end
       if (currentIndex >= advertisements.length) {
@@ -112,7 +171,13 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
         translateX = -(totalSlides - 1 - adjustedIndex) * slideWidthPercent;
       }
       
-      sliderRef.current.style.transform = `translateX(${translateX}%)`;
+      // Update state and apply transform
+      const transformValue = `translateX(${translateX}%)`;
+      setSliderTransform(transformValue); // Update state to persist through re-renders
+      
+      if (sliderRef.current) {
+        sliderRef.current.style.transform = transformValue;
+      }
     }
   }, [currentIndex, advertisements.length, isTransitioning, side]);
 
@@ -213,7 +278,9 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
           className="advertisement-slider"
           style={{
             width: `${(advertisements.length + 2) * 100}%`, // +2 for duplicate slides
-            transition: (isPaused || !isTransitioning || isLoopingRef.current) ? 'none' : 'transform 0.5s ease-in-out'
+            transition: (isPaused || !isTransitioning || isLoopingRef.current) ? 'none' : 'transform 0.5s ease-in-out',
+            // Use state-managed transform to ensure it persists through re-renders
+            transform: sliderTransform
           }}
         >
           {(() => {
@@ -253,7 +320,10 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
                   style={{ 
                     width: `${100 / (advertisements.length + 2)}%`,
                     minWidth: `${100 / (advertisements.length + 2)}%`,
-                    maxWidth: `${100 / (advertisements.length + 2)}%`
+                    maxWidth: `${100 / (advertisements.length + 2)}%`,
+                    flexShrink: 0,
+                    flexGrow: 0,
+                    height: '100%'
                   }}
                 >
                   <img 
@@ -261,16 +331,23 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
                     alt={ad.redirectUrl ? `Advertisement - ${ad.redirectUrl}` : 'Advertisement'} 
                     className="advertisement-image"
                     loading="eager"
-                    fetchPriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
+                    fetchpriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
+                    style={{
+                      display: 'block',
+                      visibility: 'visible',
+                      opacity: 1,
+                      width: '100%',
+                      height: '100%'
+                    }}
                     onError={(e) => {
-                      // Hide broken images
-                      e.target.style.display = 'none';
+                      // Show broken image icon
+                      e.target.style.opacity = '0.3';
                     }}
                     onLoad={(e) => {
-                      // Ensure image is visible once loaded
-                      if (e.target.style.display === 'none') {
-                        e.target.style.display = '';
-                      }
+                      // Ensure image is visible once loaded - force it with !important via setProperty
+                      e.target.style.setProperty('display', 'block', 'important');
+                      e.target.style.setProperty('visibility', 'visible', 'important');
+                      e.target.style.setProperty('opacity', '1', 'important');
                     }}
                   />
                 </div>

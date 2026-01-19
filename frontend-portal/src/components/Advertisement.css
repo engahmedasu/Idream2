@@ -20,29 +20,29 @@
   flex: 1;
   overflow: hidden;
   position: relative;
+  min-height: 0;
 }
 
 .advertisement-slider {
   display: flex;
   height: 100%;
   will-change: transform;
+  position: relative;
 }
 
 .advertisement-slide {
   /* Each slide takes full width of container (100% / number of slides) */
-  width: 100%;
+  /* Width is set inline */
   height: 100%;
   flex-shrink: 0;
   flex-grow: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
   background: #f3f4f6; /* Light gray background to prevent empty space */
+  display: block;
 }
 
 .advertisement-slide.clickable {
@@ -50,9 +50,9 @@
 }
 
 .advertisement-image {
-  width: 100%;
-  height: 100%;
-  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
   object-fit: cover;
   object-position: center;
   margin: 0;
@@ -62,6 +62,10 @@
   -webkit-user-drag: none;
   background: #f3f4f6; /* Fallback background while loading */
   min-height: 100%; /* Ensure it fills the container */
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* Responsive styles */

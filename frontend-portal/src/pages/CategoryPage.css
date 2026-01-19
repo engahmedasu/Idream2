@@ -448,4 +448,9 @@
   .advertisement-mobile {
     display: none;
   }
+  
+  /* Ensure desktop side advertisements are visible */
+  .category-page-wrapper > .advertisement-container {
+    display: flex !important;
+  }
 }

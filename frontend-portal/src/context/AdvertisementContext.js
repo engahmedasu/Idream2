@@ -3,7 +3,7 @@ import api from '../utils/api';
 
 const AdvertisementContext = createContext();
 
-export const useAdvertisement = () => {
+export const useAdvertisement = (home = false) => {
   const context = useContext(AdvertisementContext);
   if (!context) {
     throw new Error('useAdvertisement must be used within AdvertisementProvider');
