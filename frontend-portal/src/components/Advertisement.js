@@ -3,7 +3,7 @@ import { useAdvertisement } from '../context/AdvertisementContext';
 import getImageUrl from '../utils/imageUrl';
 import './Advertisement.css';
 
-const Advertisement = ({ categoryId, side, autoPlayInterval = 5000, home = false }) => {
+const Advertisement = ({ categoryId, side, autoPlayInterval = 5000 }) => {
   const { fetchAdvertisements } = useAdvertisement();
   const [advertisements, setAdvertisements] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,32 +30,29 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000, home = false
     });
   }, [advertisements]);
 
-  // Load advertisements when categoryId, side, or home changes
+  // Load advertisements only once per page load (on mount)
   useEffect(() => {
-    // Create a unique key for this category-side-home combination
-    const loadKey = home ? `home-${side}` : `${categoryId || 'all'}-${side}`;
-    
-    // Only reload if the category, side, or home flag has changed
-    if (hasLoadedRef.current === loadKey) {
-      return; // Already loaded for this combination, don't reload
+    // Only load if we haven't loaded for this side yet
+    if (hasLoadedRef.current) {
+      return; // Already loaded, don't reload
     }
 
     const loadAdvertisements = async () => {
       try {
         setLoading(true);
-        // Fetch advertisements filtered by category/home and side
-        const ads = await fetchAdvertisements(categoryId, side, home);
+        // Fetch advertisements for this side (categoryId is ignored after first load)
+        const ads = await fetchAdvertisements(categoryId, side);
         
         // Always set the ads, even if empty (to show that loading is complete)
         setAdvertisements(ads || []);
         setCurrentIndex(0);
         setIsTransitioning(true);
         isLoopingRef.current = false; // Reset looping state
-        hasLoadedRef.current = loadKey; // Mark this combination as loaded
+        hasLoadedRef.current = true; // Mark as loaded
       } catch (error) {
-        console.error(`Error loading advertisements for ${side} side (home: ${home}, category: ${categoryId}):`, error);
+        console.error(`Error loading advertisements for ${side} side:`, error);
         setAdvertisements([]);
-        hasLoadedRef.current = loadKey; // Mark as loaded even on error to prevent retries
+        hasLoadedRef.current = true; // Mark as loaded even on error to prevent retries
       } finally {
         setLoading(false);
       }
@@ -63,7 +60,7 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000, home = false
 
     loadAdvertisements();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId, side, home]); // Re-run when categoryId, side, or home changes
+  }, []); // Empty dependency array - only run once on mount
 
   // Update slider position
   useEffect(() => {
@@ -264,7 +261,7 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000, home = false
                     alt={ad.redirectUrl ? `Advertisement - ${ad.redirectUrl}` : 'Advertisement'} 
                     className="advertisement-image"
                     loading="eager"
-                    fetchpriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
+                    fetchPriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
                     onError={(e) => {
                       // Hide broken images
                       e.target.style.display = 'none';
@@ -304,5 +301,11 @@ const Advertisement = ({ categoryId, side, autoPlayInterval = 5000, home = false
   );
 };
 
-// Export component - memoization is handled internally via useEffect dependencies
-export default Advertisement;
+// Memoize component to prevent unnecessary re-renders
+// Compare props to determine if re-render is needed
+export default React.memo(Advertisement, (prevProps, nextProps) => {
+  // Only re-render if side or categoryId changes
+  return prevProps.side === nextProps.side && 
+         prevProps.categoryId === nextProps.categoryId &&
+         prevProps.autoPlayInterval === nextProps.autoPlayInterval;
+});
