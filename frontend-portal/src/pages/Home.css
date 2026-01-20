@@ -4,19 +4,29 @@
 }
 
 .home-wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
+  max-width: 1440px;
+  width: 100%;
+  margin: auto;
+  padding: 2rem 0;
+  gap: 1rem;
+  align-items: flex-start;
+  /*display: flex;
   max-width: 2400px;
   margin: auto auto;
   padding: 2rem 0;
   gap: 1rem;
-  align-items: flex-start;
+  align-items: flex-start;*/
 }
 
 .home-container {
-  flex: 1;
+  max-width: 100%;
+  padding: 0 2rem;
+  /*flex: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 2rem;*/
 }
 
 .welcome-banner {
@@ -119,6 +129,15 @@
 @media (min-width: 1200px) {
   .hot-offer-card {
     flex: 0 0 380px; /* Fixed width on large screens */
+  }
+}
+@media (max-width: 992px) {
+  .home-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .advertisement-container {
+    display: none;
   }
 }
 
@@ -455,5 +474,9 @@
   /* Ensure desktop side advertisements are visible */
   .home-wrapper > .advertisement-container {
     display: flex !important;
+  }
+
+  .advertisement-container {
+    width: 260px;
   }
 }
