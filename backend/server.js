@@ -95,6 +95,7 @@ app.use('/api/contact', checkDBConnection, require('./routes/contact'));
 app.use('/api/requests', checkDBConnection, require('./routes/requests'));
 app.use('/api/advertisements', checkDBConnection, require('./routes/advertisements'));
 app.use('/api/ai', checkDBConnection, require('./routes/ai'));
+app.use('/api/meta', checkDBConnection, require('./routes/metaOg'));
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

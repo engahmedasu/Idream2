@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import formatCurrency from '../utils/formatCurrency';
+import { updateMetaTags } from '../utils/metaTags';
 import { toast } from 'react-toastify';
 import './ProductDetail.css';
 
@@ -24,7 +25,23 @@ const ProductDetail = () => {
   const fetchProduct = useCallback(async () => {
     try {
       const response = await api.get(`/products/${id}`);
-      setProduct(response.data);
+      const p = response.data;
+      setProduct(p);
+      // Link preview (Facebook, WhatsApp, Twitter, etc.)
+      const desc = (p.description || '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 160);
+      updateMetaTags({
+        title: p.name,
+        description: desc || `${p.name} at iDream Mall`,
+        image: getImageUrl(p.image) || '/logo.svg',
+        url: window.location.href,
+        type: 'product',
+        priceAmount: p.price,
+        priceCurrency: 'EGP'
+      });
     } catch (error) {
       console.error('Error fetching product:', error);
     } finally {

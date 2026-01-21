@@ -25,8 +25,8 @@ const transporter = nodemailer.createTransport({
 transporter.verify((error, success) => {
   if (error) {
     console.error('❌ Email transporter verification failed:', error.message);
-    
-    // Check for various authentication error patterns
+
+    const isAccessRestricted = /554|5\.7\.8|Access Restricted/i.test(error.message);
     const authErrors = [
       'BadCredentials',
       'Username and Password not accepted',
@@ -36,31 +36,40 @@ transporter.verify((error, success) => {
       'EAUTH',
       'Invalid login'
     ];
-    
-    const isAuthError = authErrors.some(pattern => 
+    const isAuthError = authErrors.some(pattern =>
       error.message.includes(pattern) || error.code === 'EAUTH'
     );
-    
-    if (isAuthError) {
+
+    if (isAccessRestricted) {
+      console.error('\n📧 Zoho "554 5.7.8 Access Restricted" – SMTP/IMAP access is blocked:');
+      console.error('   https://help.zoho.com/portal/en/community/topic/zoho-mail-server-details');
+      console.error('');
+      console.error('   Fix checklist:');
+      console.error('   1. App Password: If 2FA is on, use an Application-Specific Password in EMAIL_PASS');
+      console.error('      (Zoho: My Account → Security → Application-Specific Passwords)');
+      console.error('   2. SMTP host: Use smtppro.zoho.com for domain/paid (e.g. no.reply@idreamegypt.com)');
+      console.error('      Use smtp.zoho.com for @zoho.com / @zohomail.com');
+      console.error('   3. Zoho Mail: Settings → Mail Accounts → POP/IMAP Access → enable IMAP & SMTP');
+      console.error('   4. Org/Admin: If this is an org account, ask admin to allow SMTP in Email Policy');
+      console.error('   5. Plan: Free plans may no longer get SMTP; check your Zoho plan.');
+    } else if (isAuthError) {
       console.error('\n📧 Zoho Email Authentication Error:');
       console.error('   1. Make sure EMAIL_USER is your full Zoho email address (e.g., yourname@zoho.com)');
       console.error('   2. Use your Zoho account password or App Password in EMAIL_PASS');
       console.error('   3. If 2FA is enabled, generate an App Password from Zoho Account settings');
       console.error('   4. Check for extra spaces or quotes in your .env file');
-      console.error('   5. Verify EMAIL_HOST matches your Zoho region:');
-      console.error('      - smtp.zoho.com (US/Global)');
-      console.error('      - smtp.zoho.eu (Europe)');
-      console.error('      - smtp.zoho.in (India)');
-      console.error('      - smtp.zoho.com.au (Australia)');
+      console.error('   5. Verify EMAIL_HOST: smtp.zoho.com (free) or smtppro.zoho.com (domain/paid)');
+      console.error('      Regions: smtp.zoho.eu, smtp.zoho.in, smtp.zoho.com.au');
+    }
+
+    if (isAccessRestricted || isAuthError) {
       console.error('\n🔍 Current Configuration:');
       console.error(`   EMAIL_USER: ${config.email.user ? `"${config.email.user}" (${config.email.user.length} chars)` : '❌ NOT SET'}`);
       console.error(`   EMAIL_PASS: ${config.email.password ? `"${'*'.repeat(config.email.password.length)}" (${config.email.password.length} chars)` : '❌ NOT SET'}`);
       console.error(`   EMAIL_HOST: ${config.email.host}`);
       console.error(`   EMAIL_PORT: ${config.email.port}`);
-      
-      // Additional checks
-      if (config.email.user && !config.email.user.includes('@zoho')) {
-        console.error('\n⚠️  WARNING: EMAIL_USER should be a Zoho email address (e.g., yourname@zoho.com, yourname@zoho.eu)');
+      if (config.email.user && !/@zoho|@zohomail\.com/i.test(config.email.user)) {
+        console.error('\n   → Domain accounts (e.g. no.reply@idreamegypt.com) must use EMAIL_HOST=smtppro.zoho.com');
       }
     }
   } else {
@@ -102,13 +111,19 @@ exports.sendOTPEmail = async (email, otp) => {
       'Authentication Failed',
       '535 Authentication Failed',
       '535',
-      'Invalid login'
+      'EAUTH',
+      'Invalid login',
+      '554',
+      'Access Restricted'
     ];
-    
+
     if (authErrors.some(pattern => error.message.includes(pattern)) || error.code === 'EAUTH') {
-      throw new Error('Zoho email authentication failed. Please check your EMAIL_USER and EMAIL_PASS in .env file. Make sure EMAIL_USER is your full Zoho email address. If 2FA is enabled, use an App Password from your Zoho Account settings. Also verify EMAIL_HOST matches your Zoho region (smtp.zoho.com, smtp.zoho.eu, smtp.zoho.in, or smtp.zoho.com.au).');
+      const hint = /554|Access Restricted/i.test(error.message)
+        ? 'Zoho may be blocking SMTP: use an Application-Specific Password if 2FA is on, enable POP/IMAP in Zoho Mail, use smtppro.zoho.com for domain accounts, and check org Email Policy. See: https://help.zoho.com/portal/en/community/topic/zoho-mail-server-details'
+        : 'Check EMAIL_USER (full address), EMAIL_PASS (or App Password if 2FA), and EMAIL_HOST (smtp.zoho.com or smtppro.zoho.com for domain).';
+      throw new Error(`Zoho email authentication failed. ${hint}`);
     }
-    
+
     throw error;
   }
 };

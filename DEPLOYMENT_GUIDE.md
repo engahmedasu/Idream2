@@ -282,6 +282,10 @@ EMAIL_PASS=your-password
 # CORS Configuration (allowed origins for API access)
 # Separate multiple origins with commas (no spaces)
 CORS_ORIGIN=https://mall.idreamegypt.com,https://idreamegypt.com,https://admin.idreamegypt.com
+
+# Link previews (Open Graph) – used by /api/meta/og/html for Facebook, WhatsApp, Twitter, etc.
+SITE_URL=https://mall.idreamegypt.com
+IMAGE_BASE_URL=https://api.idreamegypt.com
 ```
 
 ### 4.4 Initialize Database
@@ -527,6 +531,18 @@ server {
     gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript;
 
     location / {
+        # Link previews: serve og/twitter meta HTML to crawlers (Facebook, WhatsApp, Twitter, etc.)
+        set $proxy_meta 0;
+        if ($http_user_agent ~* "facebookexternalhit|Twitterbot|WhatsApp|LinkedInBot|Slackbot|TelegramBot|Pinterest|Discordbot") { set $proxy_meta 1; }
+        if ($uri ~ ^/(product|shop)/) { set $proxy_meta "${proxy_meta}1"; }
+        if ($uri = /) { set $proxy_meta "${proxy_meta}1"; }
+        if ($proxy_meta = 11) {
+            proxy_pass http://127.0.0.1:5000/api/meta/og/html?path=$uri;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
         try_files $uri $uri/ /index.html;
     }
 
@@ -542,6 +558,8 @@ server {
     add_header X-XSS-Protection "1; mode=block" always;
 }
 ```
+
+**Note on link previews:** The `location /` block includes an optional proxy for crawlers. When Facebook, WhatsApp, Twitter, etc. request `/`, `/product/:id`, or `/shop/:shareLink`, Nginx sends them to the backend `GET /api/meta/og/html?path=...`, which returns HTML with Open Graph and Twitter Card meta so shared links show title, description, and image. The API must be reachable at `http://127.0.0.1:5000` from Nginx (same host as the backend). If the API runs elsewhere, change `proxy_pass` to that URL.
 
 ### 7.3 Create Nginx Configuration for Admin Portal
 

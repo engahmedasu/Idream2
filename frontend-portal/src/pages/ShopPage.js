@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import ProductGrid from '../components/ProductGrid';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import { updateMetaTags } from '../utils/metaTags';
 import './ShopPage.css';
 
 const ShopPage = () => {
@@ -20,7 +21,16 @@ const ShopPage = () => {
     try {
       setLoading(true);
       const response = await api.get(`/shops/share/${shareLink}`);
+      const { shop } = response.data;
       setShopData(response.data);
+      // Link preview (Facebook, WhatsApp, Twitter, etc.)
+      const desc = `${shop.name}${shop.category?.name ? ` - ${shop.category.name}` : ''} - Shop at iDream Mall`;
+      updateMetaTags({
+        title: shop.name,
+        description: desc,
+        image: shop.image ? getImageUrl(shop.image) : '/logo.svg',
+        url: window.location.href
+      });
     } catch (error) {
       console.error('Error fetching shop data:', error);
     } finally {

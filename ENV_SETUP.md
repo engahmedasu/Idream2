@@ -138,6 +138,16 @@ Edit each `.env.dev` and `.env.prod` file (or `.env` if using legacy approach) w
    - **For Zoho**: Use your Zoho account password or App Password (if 2FA is enabled)
    - If 2FA is enabled, generate App Password from Zoho Account settings
 
+#### Link Previews (Open Graph, optional)
+
+10. **SITE_URL**
+    - Public URL of the frontend (e.g. `https://mall.idreamegypt.com`)
+    - Used by `/api/meta/og/html` for `og:url` and default image base
+
+11. **IMAGE_BASE_URL**
+    - Base URL for uploaded images (e.g. `https://api.idreamegypt.com`)
+    - Used for `og:image` in product/shop previews. Defaults to API origin in production.
+
 ### Frontend Portal (.env)
 
 1. **REACT_APP_API_URL**
