@@ -4,29 +4,22 @@
 }
 
 .home-wrapper {
-  display: flex;
+  display: grid;
   grid-template-columns: 260px minmax(0, 1fr) 260px;
   max-width: 1440px;
   width: 100%;
+  min-width: 0; /* Firefox zoom: allow grid to shrink */
   margin: auto;
   padding: 2rem 0;
   gap: 1rem;
   align-items: flex-start;
-  /*display: flex;
-  max-width: 2400px;
-  margin: auto auto;
-  padding: 2rem 0;
-  gap: 1rem;
-  align-items: flex-start;*/
 }
 
 .home-container {
   max-width: 100%;
+  min-width: 0; /* Firefox zoom: allow flex/grid child to shrink */
   padding: 0 2rem;
-  /*flex: 1;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 2rem;*/
+  overflow-x: hidden;
 }
 
 .welcome-banner {
@@ -87,7 +80,10 @@
 .carousel-wrapper {
   position: relative;
   width: 100%;
+  max-width: 100%;
+  min-width: 0; /* Firefox zoom: contain carousel */
   padding: 0 3rem; /* Space for navigation arrows */
+  overflow: hidden; /* Firefox zoom: scroll stays inside carousel */
 }
 
 .hot-offers-carousel {
@@ -102,6 +98,7 @@
   scroll-snap-type: x mandatory;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hot-offers-carousel::-webkit-scrollbar {
@@ -114,7 +111,7 @@
 
 .hot-offer-card {
   flex: 0 0 calc((100% - 3rem) / 3); /* 3 items with 2 gaps (1.5rem each) */
-  min-width: 300px;
+  min-width: min(300px, 85vw); /* Firefox zoom: avoid forcing page extend */
   max-width: 380px;
   background: white;
   border-radius: 12px;

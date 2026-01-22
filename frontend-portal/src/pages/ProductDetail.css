@@ -1,7 +1,10 @@
 .product-detail-container {
   max-width: 1200px;
+  width: 100%;
+  min-width: 0; /* Firefox zoom: contain layout */
   margin: 0 auto;
   padding: 2rem;
+  overflow-x: hidden;
 }
 
 .product-main {
@@ -9,6 +12,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 3rem;
   margin-bottom: 3rem;
+  min-width: 0; /* Firefox zoom: allow grid to shrink */
 }
 
 .product-image-section {

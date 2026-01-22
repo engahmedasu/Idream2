@@ -263,20 +263,20 @@ const Advertisement = ({ categoryId, side, home = false, autoPlayInterval = 5000
     }
   };
 
-  if (loading) {
-    return null;
-  }
-
-  if (!advertisements || advertisements.length === 0) {
-    return null;
-  }
+  const hasAds = advertisements && advertisements.length > 0;
 
   return (
     <div 
-      className={`advertisement-container advertisement-${side}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={`advertisement-container advertisement-${side}${!hasAds ? ' advertisement-empty' : ''}`}
+      onMouseEnter={hasAds ? handleMouseEnter : undefined}
+      onMouseLeave={hasAds ? handleMouseLeave : undefined}
     >
+      {!hasAds ? (
+        <div className="advertisement-placeholder" aria-hidden="true">
+          <span className="advertisement-placeholder-text">{loading ? '' : 'Ad space'}</span>
+        </div>
+      ) : (
+        <>
       <div className="advertisement-slider-wrapper">
         <div 
           ref={sliderRef}
@@ -376,6 +376,8 @@ const Advertisement = ({ categoryId, side, home = false, autoPlayInterval = 5000
             />
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );

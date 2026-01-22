@@ -1,7 +1,10 @@
 .shop-page-container {
   max-width: 1200px;
+  width: 100%;
+  min-width: 0; /* Firefox zoom: contain layout */
   margin: 0 auto;
   padding: 0;
+  overflow-x: hidden;
 }
 
 .shop-hero {

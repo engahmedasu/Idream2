@@ -1,12 +1,16 @@
 .category-menu-container {
   max-width: 1400px;
+  width: 100%;
+  min-width: 0; /* Firefox zoom: contain horizontal scroll */
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: thin;
   scrollbar-color: #d1d5db #f3f4f6;
+  -webkit-overflow-scrolling: touch;
 }
 
 .category-menu-container::-webkit-scrollbar {

@@ -6,6 +6,8 @@
 
 .grow-container {
   max-width: 1400px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
   text-align: center;
 }
@@ -62,6 +64,8 @@
 
 .footer-container {
   max-width: 1400px;
+  width: 100%;
+  min-width: 0;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;

@@ -1,8 +1,9 @@
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); /* Firefox zoom: avoid extend */
   gap: 1.5rem;
   padding: 1rem 0;
+  min-width: 0;
 }
 
 .product-grid.loading,
@@ -21,7 +22,7 @@
 
 @media (max-width: 768px) {
   .product-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); /* Firefox zoom */
     gap: 1rem;
   }
 }

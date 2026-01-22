@@ -13,6 +13,7 @@
   align-items: stretch;
   box-sizing: border-box;
   overflow: hidden;
+  background-color: transparent !important;
 }
 
 .advertisement-slider-wrapper {
@@ -21,6 +22,25 @@
   overflow: hidden;
   position: relative;
   min-height: 0;
+}
+
+/* Placeholder when no ads: same design and space as slider */
+.advertisement-placeholder {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+}
+
+.advertisement-placeholder-text {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
 .advertisement-slider {
@@ -41,7 +61,7 @@
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
-  background: #f3f4f6; /* Light gray background to prevent empty space */
+  background: transparent;
   display: block;
 }
 
@@ -60,7 +80,7 @@
   box-sizing: border-box;
   user-select: none;
   -webkit-user-drag: none;
-  background: #f3f4f6; /* Fallback background while loading */
+  background: transparent;
   min-height: 100%; /* Ensure it fills the container */
   visibility: visible !important;
   opacity: 1 !important;
@@ -142,6 +162,7 @@
   
   .advertisement-container {
     animation: none !important;
+    background-color: transparent;
   }
   
   .advertisement-indicator {
