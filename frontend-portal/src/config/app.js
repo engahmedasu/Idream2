@@ -75,6 +75,16 @@ const config = {
     cacheStrategy: isProduction ? 'cache-first' : 'network-first',
   },
 
+  // Media Cache Configuration
+  cache: {
+    // Cache duration in hours (default: 168 hours = 7 days)
+    durationHours: parseInt(process.env.REACT_APP_CACHE_DURATION_HOURS || process.env.REACT_APP_MEDIA_CACHE_HOURS || '168', 10),
+    // Enable localStorage fallback for small images (< 1MB)
+    enableLocalStorageFallback: true,
+    // Auto cleanup expired entries on app start
+    autoCleanup: true,
+  },
+
   // Development Tools
   devTools: {
     enableReactDevTools: isDevelopment,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -24,6 +24,7 @@ import OrderSummary from './pages/OrderSummary';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { AdvertisementProvider } from './context/AdvertisementContext';
+import { cleanupExpired } from './utils/mediaCache';
 
 function AppContent() {
   const [cartOpen, setCartOpen] = useState(false);
@@ -59,6 +60,11 @@ function AppContent() {
 }
 
 function App() {
+  // Initialize cache cleanup on app start
+  useEffect(() => {
+    cleanupExpired();
+  }, []);
+
   return (
     <AuthProvider>
       <CartProvider>

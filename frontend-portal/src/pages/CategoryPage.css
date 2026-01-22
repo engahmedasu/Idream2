@@ -4,19 +4,29 @@
 }
 
 .category-page-wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
+  max-width: 1440px;
+  width: 100%;
+  margin: auto;
+  padding: 2rem 0;
+  gap: 1rem;
+  align-items: flex-start;
+  /*display: flex;
   max-width: 2400px;
   margin: 0 auto;
   padding: 2rem 0;
   gap: 1rem;
-  align-items: flex-start;
+  align-items: flex-start;*/
 }
 
 .category-page-container {
-  flex: 1;
+  max-width: 100%;
+  padding: 0 2rem;
+  /*flex: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 2rem;*/
 }
 
 .welcome-banner {

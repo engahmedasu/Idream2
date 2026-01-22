@@ -2,25 +2,56 @@
 // This warning comes from older dependencies (like some versions of mongoose/nodemailer)
 // that haven't been updated to use Object.assign() instead of util._extend
 // Set this handler BEFORE requiring any modules to catch warnings during module loading
+
+// Method 1: Override process.emitWarning (must be first, before any requires)
 const originalEmitWarning = process.emitWarning;
 process.emitWarning = function(warning, type, code, ctor) {
   // Suppress only DEP0060 (util._extend) warnings
   if (type === 'DeprecationWarning' && code === 'DEP0060') {
     return; // Silently ignore
   }
+  // Also check message content as fallback (in case format differs)
+  const warningStr = typeof warning === 'string' ? warning : (warning?.message || String(warning));
+  if (warningStr.includes('util._extend') || warningStr.includes('DEP0060')) {
+    return;
+  }
   // Pass through all other warnings
   return originalEmitWarning.call(this, warning, type, code, ctor);
 };
 
-// Also handle process.on('warning') events as a fallback
-process.on('warning', (warning) => {
+// Method 2: Handle process.on('warning') events (catches warnings emitted during module load)
+// This must be set up before any modules are loaded
+const warningHandler = (warning) => {
   if (warning.name === 'DeprecationWarning' && warning.code === 'DEP0060') {
     // Suppress util._extend deprecation warning - it's from a dependency, not our code
     return;
   }
+  // Also check message content
+  if (warning.message && (warning.message.includes('util._extend') || warning.message.includes('DEP0060'))) {
+    return;
+  }
   // Show other warnings normally
   console.warn(warning.name, warning.message);
-});
+};
+
+// Remove existing handler if any, then add ours
+process.removeAllListeners('warning');
+process.on('warning', warningHandler);
+
+// Method 3: Also suppress via stderr interception (last resort for stubborn warnings)
+// This catches warnings that might bypass the above methods
+// Only intercept deprecation warnings, not all stderr output
+const originalStderrWrite = process.stderr.write.bind(process.stderr);
+process.stderr.write = function(chunk, encoding, fd) {
+  if (typeof chunk === 'string') {
+    // Only suppress if it's clearly a DEP0060 deprecation warning
+    if ((chunk.includes('DEP0060') || chunk.includes('[DEP0060]')) && 
+        (chunk.includes('DeprecationWarning') || chunk.includes('util._extend'))) {
+      return true; // Suppress by returning true without writing
+    }
+  }
+  return originalStderrWrite(chunk, encoding, fd);
+};
 
 const express = require('express');
 const mongoose = require('mongoose');

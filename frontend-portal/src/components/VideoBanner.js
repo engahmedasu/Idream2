@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../utils/api';
-import getImageUrl from '../utils/imageUrl';
+import getImageUrl, { getCachedImageUrl } from '../utils/imageUrl';
+import { getCachedMedia, preloadMedia } from '../utils/mediaCache';
 import './VideoBanner.css';
 
 const VideoBanner = ({ categoryId = null }) => {
   const [videos, setVideos] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [videoSource, setVideoSource] = useState(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState(null);
   const videoRef = useRef(null);
   const iframeRef = useRef(null);
 
@@ -24,6 +27,32 @@ const VideoBanner = ({ categoryId = null }) => {
       // Sort by priority (higher priority first)
       const sortedVideos = response.data.sort((a, b) => (b.priority || 0) - (a.priority || 0));
       setVideos(sortedVideos);
+      
+      // Preload and cache video URLs and thumbnails
+      const urlsToCache = sortedVideos
+        .map(video => {
+          const urls = [];
+          // Cache local video files (not YouTube/Vimeo)
+          if (video.videoUrl && !video.videoUrl.includes('youtube.com') && !video.videoUrl.includes('youtu.be') && !video.videoUrl.includes('vimeo.com')) {
+            if (video.videoUrl.startsWith('/uploads/')) {
+              urls.push(getImageUrl(video.videoUrl));
+            } else if (video.videoUrl.startsWith('http://') || video.videoUrl.startsWith('https://')) {
+              urls.push(video.videoUrl);
+            }
+          }
+          // Cache thumbnails
+          if (video.thumbnailUrl) {
+            urls.push(getImageUrl(video.thumbnailUrl));
+          }
+          return urls;
+        })
+        .flat();
+      
+      // Preload in background (don't wait)
+      preloadMedia(urlsToCache).catch(err => {
+        console.warn('Failed to preload some media:', err);
+      });
+      
       // Reset to first video when category changes
       setCurrentIndex(0);
     } catch (error) {
@@ -38,8 +67,8 @@ const VideoBanner = ({ categoryId = null }) => {
     setCurrentIndex((prev) => (prev + 1) % videos.length);
   }, [videos.length]);
 
-  // Get video source URL with proper formatting
-  const getVideoSource = (video) => {
+  // Get video source URL with proper formatting (async for cached local videos)
+  const getVideoSource = async (video) => {
     if (!video?.videoUrl) return null;
     
     // If it's a YouTube URL
@@ -63,9 +92,25 @@ const VideoBanner = ({ categoryId = null }) => {
       return video.videoUrl;
     }
     
-    // If it's a local file URL
+    // If it's a local file URL, try to get cached version
     if (video.videoUrl.startsWith('/uploads/')) {
-      return getImageUrl(video.videoUrl);
+      const fullUrl = getImageUrl(video.videoUrl);
+      try {
+        return await getCachedMedia(fullUrl);
+      } catch (error) {
+        console.warn('Failed to get cached video, using original:', error);
+        return fullUrl;
+      }
+    }
+    
+    // For external URLs (not YouTube), try to cache
+    if (video.videoUrl.startsWith('http://') || video.videoUrl.startsWith('https://')) {
+      try {
+        return await getCachedMedia(video.videoUrl);
+      } catch (error) {
+        console.warn('Failed to get cached video, using original:', error);
+        return video.videoUrl;
+      }
     }
     
     // Otherwise return as is (Vimeo, etc.)
@@ -79,70 +124,96 @@ const VideoBanner = ({ categoryId = null }) => {
     const currentVideo = videos[currentIndex];
     if (!currentVideo) return;
 
-    // For local video files - these will automatically advance on end
-    if (videoRef.current && currentVideo.videoUrl && !currentVideo.videoUrl.includes('youtube.com') && !currentVideo.videoUrl.includes('youtu.be')) {
-      const videoSource = getVideoSource(currentVideo);
-      if (videoSource) {
-        const video = videoRef.current;
-        const currentSrc = video.src || video.currentSrc;
-        
-        // Only reload if the source has changed
-        if (currentSrc !== videoSource) {
-          // Pause and reset current time to prevent conflicts
-          video.pause();
-          video.currentTime = 0;
+    const loadVideo = async () => {
+      // For local video files - these will automatically advance on end
+      if (videoRef.current && currentVideo.videoUrl && !currentVideo.videoUrl.includes('youtube.com') && !currentVideo.videoUrl.includes('youtu.be')) {
+        const videoSource = await getVideoSource(currentVideo);
+        if (videoSource) {
+          const video = videoRef.current;
+          const currentSrc = video.src || video.currentSrc;
           
-          // Remove any existing event listeners to prevent conflicts
-          const handleCanPlay = () => {
-            // Use requestAnimationFrame to ensure DOM is ready
-            requestAnimationFrame(() => {
-              video.play().catch(err => {
-                // Only log if it's not an AbortError (which is expected when interrupted)
-                if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
-                  console.log('Autoplay prevented:', err);
-                }
+          // Only reload if the source has changed
+          if (currentSrc !== videoSource) {
+            // Pause and reset current time to prevent conflicts
+            video.pause();
+            video.currentTime = 0;
+            
+            // Remove any existing event listeners to prevent conflicts
+            const handleCanPlay = () => {
+              // Use requestAnimationFrame to ensure DOM is ready
+              requestAnimationFrame(() => {
+                video.play().catch(err => {
+                  // Only log if it's not an AbortError (which is expected when interrupted)
+                  if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                    console.log('Autoplay prevented:', err);
+                  }
+                });
               });
+              video.removeEventListener('canplay', handleCanPlay);
+            };
+            
+            // Wait for video to be ready before playing
+            video.addEventListener('canplay', handleCanPlay, { once: true });
+            
+            // Set source and load
+            video.src = videoSource;
+            video.load();
+          } else if (video.paused) {
+            // If same source but paused, just resume
+            video.play().catch(err => {
+              if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                console.log('Autoplay prevented:', err);
+              }
             });
-            video.removeEventListener('canplay', handleCanPlay);
-          };
-          
-          // Wait for video to be ready before playing
-          video.addEventListener('canplay', handleCanPlay, { once: true });
-          
-          // Set source and load
-          video.src = videoSource;
-          video.load();
-        } else if (video.paused) {
-          // If same source but paused, just resume
-          video.play().catch(err => {
-            if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
-              console.log('Autoplay prevented:', err);
-            }
-          });
+          }
         }
       }
+
+      // For YouTube iframes, reload with autoplay parameter
+      // Note: YouTube iframes don't provide reliable end event without YouTube IFrame API
+      // For full sequential playback with YouTube, consider implementing YouTube IFrame Player API
+      if (iframeRef.current && currentVideo.videoUrl && (currentVideo.videoUrl.includes('youtube.com') || currentVideo.videoUrl.includes('youtu.be'))) {
+        const videoSource = await getVideoSource(currentVideo);
+        if (videoSource && iframeRef.current.src !== videoSource) {
+          iframeRef.current.src = videoSource;
+        }
+      }
+    };
+
+    loadVideo();
+  }, [currentIndex, videos, handleVideoEnd]);
+
+  const currentVideo = videos[currentIndex];
+
+  // Load cached video source and thumbnail when video changes
+  useEffect(() => {
+    if (!currentVideo) {
+      setVideoSource(null);
+      setThumbnailUrl(null);
+      return;
     }
 
-    // For YouTube iframes, reload with autoplay parameter
-    // Note: YouTube iframes don't provide reliable end event without YouTube IFrame API
-    // For full sequential playback with YouTube, consider implementing YouTube IFrame Player API
-    if (iframeRef.current && currentVideo.videoUrl && (currentVideo.videoUrl.includes('youtube.com') || currentVideo.videoUrl.includes('youtu.be'))) {
-      const videoSource = getVideoSource(currentVideo);
-      if (videoSource && iframeRef.current.src !== videoSource) {
-        iframeRef.current.src = videoSource;
+    const loadMedia = async () => {
+      const source = await getVideoSource(currentVideo);
+      setVideoSource(source);
+      
+      if (currentVideo.thumbnailUrl) {
+        try {
+          const cached = await getCachedImageUrl(currentVideo.thumbnailUrl);
+          setThumbnailUrl(cached);
+        } catch (error) {
+          setThumbnailUrl(getImageUrl(currentVideo.thumbnailUrl));
+        }
+      } else {
+        setThumbnailUrl(null);
       }
-    }
-  }, [currentIndex, videos, handleVideoEnd]);
+    };
+    loadMedia();
+  }, [currentVideo, currentIndex]);
 
   if (loading || videos.length === 0) {
     return null;
   }
-
-  const currentVideo = videos[currentIndex];
-  const videoSource = getVideoSource(currentVideo);
-  const thumbnailUrl = currentVideo?.thumbnailUrl 
-    ? getImageUrl(currentVideo.thumbnailUrl)
-    : null;
 
   const isYouTube = videoSource?.includes('youtube.com/embed');
   const isVimeo = videoSource?.includes('vimeo.com');
