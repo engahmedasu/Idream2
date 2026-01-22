@@ -4,7 +4,7 @@
 }
 
 .category-page-wrapper {
-  display: grid;
+  display: flex; 
   grid-template-columns: 260px minmax(0, 1fr) 260px;
   max-width: 1440px;
   width: 100%;
