@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAdvertisement } from '../context/AdvertisementContext';
 import getImageUrl from '../utils/imageUrl';
+import { preloadMedia } from '../utils/mediaCache';
+import CachedImage from './CachedImage';
 import './Advertisement.css';
 
 const Advertisement = ({ categoryId, side, home = false, autoPlayInterval = 5000 }) => {
@@ -23,13 +25,16 @@ const Advertisement = ({ categoryId, side, home = false, autoPlayInterval = 5000
       return;
     }
 
-    // Preload images in the background
-    advertisements.forEach((ad) => {
-      if (ad && ad.image) {
-        const img = new Image();
-        img.src = getImageUrl(ad.image);
-      }
-    });
+    // Preload images using cache system
+    const imageUrls = advertisements
+      .map(ad => ad && ad.image ? getImageUrl(ad.image) : null)
+      .filter(Boolean);
+    
+    if (imageUrls.length > 0) {
+      preloadMedia(imageUrls).catch(err => {
+        console.warn('Failed to preload advertisement images:', err);
+      });
+    }
   }, [advertisements]);
 
   // Load advertisements only once per page load (on mount)
@@ -326,12 +331,10 @@ const Advertisement = ({ categoryId, side, home = false, autoPlayInterval = 5000
                     height: '100%'
                   }}
                 >
-                  <img 
-                    src={getImageUrl(ad.image)} 
+                  <CachedImage 
+                    src={ad.image} 
                     alt={ad.redirectUrl ? `Advertisement - ${ad.redirectUrl}` : 'Advertisement'} 
                     className="advertisement-image"
-                    loading="eager"
-                    fetchpriority={originalIndex === 0 && index === 1 ? "high" : "auto"}
                     style={{
                       display: 'block',
                       visibility: 'visible',

@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
 import getImageUrl from '../utils/imageUrl';
+import CachedImage from './CachedImage';
 import './CartSidebar.css';
 
 const CartSidebar = ({ isOpen, onClose }) => {
@@ -166,8 +167,8 @@ Thank you for choosing ${shopGroup.shopName} at iDream Mall`;
                   {group.items.map((item) => (
                     <div key={item._id} className="cart-item">
                       <div className="cart-item-image">
-                        <img
-                          src={getImageUrl(item.product.image)}
+                        <CachedImage
+                          src={item.product.image}
                           alt={item.product.name}
                         />
                       </div>

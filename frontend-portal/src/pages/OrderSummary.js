@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import CachedImage from '../components/CachedImage';
 import './OrderSummary.css';
 
 const OrderSummary = () => {
@@ -145,10 +146,9 @@ const OrderSummary = () => {
               {orderData.items.map((item, index) => (
                 <div key={index} className="order-item">
                   <div className="item-image">
-                    <img
-                      src={getImageUrl(item.product?.image || item.productImage || '')}
+                    <CachedImage
+                      src={item.product?.image || item.productImage || ''}
                       alt={item.product?.name || item.productName || 'Product'}
-                      onError={handleImageError}
                     />
                   </div>
                   <div className="item-details">

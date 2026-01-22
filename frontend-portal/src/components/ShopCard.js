@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FiShare2 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
-import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import CachedImage from './CachedImage';
 import './ShopCard.css';
 
 const ShopCard = ({ shop }) => {
@@ -47,11 +47,12 @@ const ShopCard = ({ shop }) => {
   return (
     <Link to={`/shop/${shop.shareLink}`} className="shop-card">
       <div className="shop-image">
-        <img
-          src={shop.image ? getImageUrl(shop.image) : ''}
-          alt={shop.name}
-          onError={handleImageError}
-        />
+        {shop.image && (
+          <CachedImage
+            src={shop.image}
+            alt={shop.name}
+          />
+        )}
       </div>
       <div className="shop-info">
         <h3 className="shop-name">{shop.name}</h3>

@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import api from '../utils/api';
-import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import CachedImage from './CachedImage';
 import ProductModal from './ProductModal';
 import './ProductCard.css';
 
@@ -73,10 +73,9 @@ const ProductCard = ({ product }) => {
     <>
       <div className="product-card" onClick={handleCardClick}>
         <div className="product-image">
-          <img
-            src={getImageUrl(product.image)}
+          <CachedImage
+            src={product.image}
             alt={product.name}
-            onError={handleImageError}
           />
           {product.isHotOffer && <span className="hot-badge">Hot Offer</span>}
         </div>

@@ -8,6 +8,7 @@ import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import formatCurrency from '../utils/formatCurrency';
 import { updateMetaTags } from '../utils/metaTags';
 import { toast } from 'react-toastify';
+import CachedImage from '../components/CachedImage';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -126,10 +127,9 @@ const ProductDetail = () => {
       <div className="product-detail-container">
         <div className="product-main">
           <div className="product-image-section">
-            <img
-              src={getImageUrl(product.image)}
+            <CachedImage
+              src={product.image}
               alt={product.name}
-              onError={handleImageError}
             />
           </div>
 

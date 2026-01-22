@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import getImageUrl from '../utils/imageUrl';
 import formatCurrency from '../utils/formatCurrency';
+import CachedImage from '../components/CachedImage';
 import './Cart.css';
 
 const Cart = () => {
@@ -61,8 +62,8 @@ const Cart = () => {
             {cart.items.map(item => (
               <div key={item._id} className="cart-item">
                 <div className="cart-item-image">
-                  <img
-                    src={getImageUrl(item.product.image)}
+                  <CachedImage
+                    src={item.product.image}
                     alt={item.product.name}
                   />
                 </div>

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import getImageUrl from '../utils/imageUrl';
 import formatCurrency from '../utils/formatCurrency';
+import { preloadMedia } from '../utils/mediaCache';
+import CachedImage from './CachedImage';
 import './HeroCarousel.css';
 
 const HeroCarousel = ({ categoryId }) => {
@@ -28,6 +30,17 @@ const HeroCarousel = ({ categoryId }) => {
       const params = categoryId ? { category: categoryId, limit: 5 } : { limit: 5 };
       const response = await api.get('/products/hot-offers', { params });
       setHotOffers(response.data);
+      
+      // Preload images in background
+      const imageUrls = response.data
+        .map(offer => offer.image ? getImageUrl(offer.image) : null)
+        .filter(Boolean);
+      
+      if (imageUrls.length > 0) {
+        preloadMedia(imageUrls).catch(err => {
+          console.warn('Failed to preload hero carousel images:', err);
+        });
+      }
     } catch (error) {
       console.error('Error fetching hot offers:', error);
     } finally {
@@ -45,7 +58,7 @@ const HeroCarousel = ({ categoryId }) => {
     <div className="hero-carousel">
       <Link to={`/product/${currentOffer._id}`} className="carousel-slide">
         <div className="carousel-image">
-          <img src={getImageUrl(currentOffer.image)} alt={currentOffer.name} />
+          <CachedImage src={currentOffer.image} alt={currentOffer.name} />
         </div>
         <div className="carousel-content">
           <h2>{currentOffer.name}</h2>

@@ -11,6 +11,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import { preloadMedia } from '../utils/mediaCache';
 import './Home.css';
 
 const Home = () => {
@@ -47,6 +48,20 @@ const Home = () => {
       // Get the first category (sorted by order on backend)
       if (categoriesRes.data && categoriesRes.data.length > 0) {
         setFirstCategory(categoriesRes.data[0]);
+      }
+
+      // Preload images in background for faster subsequent loads
+      const imageUrls = [
+        ...shopsRes.data.map(shop => shop.image ? getImageUrl(shop.image) : null).filter(Boolean),
+        ...hotOffersRes.data.map(product => product.image ? getImageUrl(product.image) : null).filter(Boolean),
+        ...(productsRes.data || []).map(product => product.image ? getImageUrl(product.image) : null).filter(Boolean)
+      ];
+      
+      // Preload in background (don't wait)
+      if (imageUrls.length > 0) {
+        preloadMedia(imageUrls).catch(err => {
+          console.warn('Failed to preload some images:', err);
+        });
       }
     } catch (error) {
       console.error('Error fetching data:', error);

@@ -5,9 +5,11 @@ import { FaFacebook, FaInstagram, FaGlobe } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import ProductGrid from '../components/ProductGrid';
+import CachedImage from '../components/CachedImage';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import { updateMetaTags } from '../utils/metaTags';
+import { preloadMedia } from '../utils/mediaCache';
 import './ShopPage.css';
 
 const ShopPage = () => {
@@ -21,7 +23,7 @@ const ShopPage = () => {
     try {
       setLoading(true);
       const response = await api.get(`/shops/share/${shareLink}`);
-      const { shop } = response.data;
+      const { shop, products } = response.data;
       setShopData(response.data);
       // Link preview (Facebook, WhatsApp, Twitter, etc.)
       const desc = `${shop.name}${shop.category?.name ? ` - ${shop.category.name}` : ''} - Shop at iDream Mall`;
@@ -31,6 +33,18 @@ const ShopPage = () => {
         image: shop.image ? getImageUrl(shop.image) : '/logo.svg',
         url: window.location.href
       });
+
+      // Preload shop and product images in background
+      const imageUrls = [
+        shop.image ? getImageUrl(shop.image) : null,
+        ...(products || []).map(product => product.image ? getImageUrl(product.image) : null)
+      ].filter(Boolean);
+      
+      if (imageUrls.length > 0) {
+        preloadMedia(imageUrls).catch(err => {
+          console.warn('Failed to preload some images:', err);
+        });
+      }
     } catch (error) {
       console.error('Error fetching shop data:', error);
     } finally {
@@ -132,11 +146,12 @@ const ShopPage = () => {
       <div className="shop-page-container">
         <div className="shop-hero">
           <div className="shop-image-banner">
-            <img
-              src={shop.image ? getImageUrl(shop.image) : ''}
-              alt={shop.name}
-              onError={handleImageError}
-            />
+            {shop.image && (
+              <CachedImage
+                src={shop.image}
+                alt={shop.name}
+              />
+            )}
             <div className="shop-image-overlay"></div>
             <div className="shop-overlay-content">
               {shop.category && (

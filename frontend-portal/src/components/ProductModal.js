@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
 import { toast } from 'react-toastify';
+import CachedImage from './CachedImage';
 import './ProductModal.css';
 
 const ProductModal = ({ productId, onClose }) => {
@@ -86,10 +87,9 @@ const ProductModal = ({ productId, onClose }) => {
 
         <div className="product-modal-content">
           <div className="product-modal-image">
-            <img
-              src={getImageUrl(product.image)}
+            <CachedImage
+              src={product.image}
               alt={product.name}
-              onError={handleImageError}
             />
           </div>
 

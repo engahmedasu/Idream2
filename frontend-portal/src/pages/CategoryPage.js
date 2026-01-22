@@ -11,6 +11,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import { preloadMedia } from '../utils/mediaCache';
 import './CategoryPage.css';
 
 const CategoryPage = () => {
@@ -37,6 +38,17 @@ const CategoryPage = () => {
         ...categoryRes.data,
         products: productsRes.data || []
       });
+
+      // Preload images in background
+      const imageUrls = (productsRes.data || [])
+        .map(product => product.image ? getImageUrl(product.image) : null)
+        .filter(Boolean);
+      
+      if (imageUrls.length > 0) {
+        preloadMedia(imageUrls).catch(err => {
+          console.warn('Failed to preload some images:', err);
+        });
+      }
     } catch (error) {
       console.error('Error fetching category data:', error);
     } finally {
