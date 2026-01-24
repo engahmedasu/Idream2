@@ -19,6 +19,7 @@
 .advertisement-slider-wrapper {
   width: 100%;
   flex: 1;
+  height: 100%;
   overflow: hidden;
   position: relative;
   min-height: 0;
@@ -28,6 +29,7 @@
 .advertisement-placeholder {
   width: 100%;
   flex: 1;
+  height: 100%;
   min-height: 0;
   display: flex;
   align-items: center;
@@ -46,6 +48,7 @@
 .advertisement-slider {
   display: flex;
   height: 100%;
+  min-height: 100%;
   will-change: transform;
   position: relative;
 }

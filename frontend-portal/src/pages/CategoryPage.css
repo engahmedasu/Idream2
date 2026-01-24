@@ -462,3 +462,7 @@
     display: flex !important;
   }
 }
+.advertisement-container {
+  height: 100%;
+  width: 260px;
+}
