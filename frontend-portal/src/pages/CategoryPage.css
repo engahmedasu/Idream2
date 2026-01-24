@@ -389,6 +389,7 @@
 
 @media (max-width: 768px) {
   .category-page-wrapper {
+    display: flex; 
     flex-direction: column;
     padding: 1rem 0;
   }
