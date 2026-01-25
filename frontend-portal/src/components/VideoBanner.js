@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../utils/api';
 import getImageUrl, { getCachedImageUrl } from '../utils/imageUrl';
 import { getCachedMedia, preloadMedia } from '../utils/mediaCache';
@@ -13,11 +13,7 @@ const VideoBanner = ({ categoryId = null }) => {
   const videoRef = useRef(null);
   const iframeRef = useRef(null);
 
-  useEffect(() => {
-    fetchVideos();
-  }, [categoryId]);
-
-  const fetchVideos = async () => {
+  const fetchVideos = useCallback(async () => {
     try {
       const params = { isActive: true };
       if (categoryId) {
@@ -60,7 +56,11 @@ const VideoBanner = ({ categoryId = null }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId]);
+
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
 
   // Handle video end event - move to next video (loops back to start when reaching end)
   const handleVideoEnd = React.useCallback(() => {
@@ -86,8 +86,8 @@ const VideoBanner = ({ categoryId = null }) => {
       
       if (videoId) {
         // Don't use loop parameter - we want sequential playback, not looping individual videos
-        // Disable controls and browser actions
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&controls=0&modestbranding=1&disablekb=1&playsinline=1`;
+        // mute=0 allows sound during autoplay (browsers may still block until user interaction)
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&controls=0&modestbranding=1&disablekb=1&playsinline=1`;
       }
       return video.videoUrl;
     }
@@ -237,7 +237,6 @@ const VideoBanner = ({ categoryId = null }) => {
               <video
                 ref={videoRef}
                 autoPlay
-                muted
                 playsInline
                 onEnded={handleVideoEnd}
                 className="video-element"
