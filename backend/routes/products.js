@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
 const { auth, optionalAuth, authorize, checkPermission } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { imageUpload } = require('../middleware/upload');
 
 /**
  * @swagger
@@ -176,7 +176,7 @@ router.get('/', optionalAuth, productController.getAllProducts);
  *       400:
  *         description: Bad request
  */
-router.post('/', auth, checkPermission('product', 'create'), upload.single('productImage'), productController.createProduct);
+router.post('/', auth, checkPermission('product', 'create'), imageUpload.single('productImage'), productController.createProduct);
 
 /**
  * @swagger
@@ -214,7 +214,7 @@ router.post('/', auth, checkPermission('product', 'create'), upload.single('prod
  *       404:
  *         description: Product not found
  */
-router.put('/:id', auth, upload.single('productImage'), productController.updateProduct);
+router.put('/:id', auth, imageUpload.single('productImage'), productController.updateProduct);
 
 /**
  * @swagger

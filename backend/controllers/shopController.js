@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const { attachRatingsToProducts } = require('./productController');
+const { processImage } = require('../services/mediaProcessor');
 
 // Helper function to validate Egyptian phone number format (+20XXXXXXXXXX)
 const validateEgyptianPhone = (phone) => {
@@ -137,7 +138,7 @@ exports.createShop = async (req, res) => {
 
     const shopData = {
       ...req.body,
-      image: req.file ? `/uploads/shops/${req.file.filename}` : '',
+      image: req.file ? `/uploads/_temp/shops/${req.file.filename}` : '',
       createdBy: req.user?._id
     };
 
@@ -160,13 +161,26 @@ exports.createShop = async (req, res) => {
       shopData.productTypes = [];
     }
 
-    const shop = await Shop.create(shopData);
-
-    // If user is creating their own shop, link it
+    let shop = await Shop.create(shopData);
+    if (req.file && req.file.path) {
+      try {
+        const urls = await processImage(req.file.path, 'shop', shop._id);
+        await Shop.findByIdAndUpdate(shop._id, {
+          thumbnailUrl: urls.thumbnailUrl,
+          mediumUrl: urls.mediumUrl,
+          originalUrl: urls.originalUrl,
+          image: urls.originalUrl
+        });
+        shop = await Shop.findById(shop._id).populate('category');
+      } catch (imgErr) {
+        console.error('Image processing failed:', imgErr);
+        await Shop.findByIdAndDelete(shop._id);
+        return res.status(500).json({ message: 'Image processing failed. Please try another image.' });
+      }
+    }
     if (req.user) {
       await User.findByIdAndUpdate(req.user._id, { shop: shop._id });
     }
-
     res.status(201).json(shop);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -228,8 +242,17 @@ exports.updateShop = async (req, res) => {
       }
     }
 
-    if (req.file) {
-      updateData.image = `/uploads/shops/${req.file.filename}`;
+    if (req.file && req.file.path) {
+      try {
+        const urls = await processImage(req.file.path, 'shop', req.params.id);
+        updateData.thumbnailUrl = urls.thumbnailUrl;
+        updateData.mediumUrl = urls.mediumUrl;
+        updateData.originalUrl = urls.originalUrl;
+        updateData.image = urls.originalUrl;
+      } catch (imgErr) {
+        console.error('Image processing failed:', imgErr);
+        return res.status(500).json({ message: 'Image processing failed. Please try another image.' });
+      }
     }
 
     const shop = await Shop.findByIdAndUpdate(

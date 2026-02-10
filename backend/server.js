@@ -58,6 +58,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 
@@ -70,7 +71,13 @@ const app = express();
 app.use(cors(config.cors));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(config.upload.uploadDir));
+
+// Static uploads: 30 days cache, etag, lastModified
+app.use('/uploads', express.static(config.upload.uploadDir, {
+  etag: true,
+  lastModified: true,
+  maxAge: '30d',
+}));
 
 // Database connection - Wait for connection before starting server
 const connectDB = async () => {
@@ -127,6 +134,7 @@ app.use('/api/requests', checkDBConnection, require('./routes/requests'));
 app.use('/api/advertisements', checkDBConnection, require('./routes/advertisements'));
 app.use('/api/ai', checkDBConnection, require('./routes/ai'));
 app.use('/api/meta', checkDBConnection, require('./routes/metaOg'));
+app.use('/api/media', checkDBConnection, require('./routes/media'));
 
 // Swagger Documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

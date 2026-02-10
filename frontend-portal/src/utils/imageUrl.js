@@ -17,6 +17,20 @@ export const getImageUrl = (imagePath) => {
 };
 
 /**
+ * Get product/shop image path by size (for optimized listing vs detail).
+ * @param {object} item - Product or shop with thumbnailUrl, mediumUrl, originalUrl, image
+ * @param {'thumbnail'|'medium'|'original'} size - thumbnail for listing, medium/original for detail
+ * @returns {string} Relative path
+ */
+export const getImagePathBySize = (item, size = 'thumbnail') => {
+  if (!item) return '';
+  if (size === 'thumbnail' && item.thumbnailUrl) return item.thumbnailUrl;
+  if (size === 'medium' && item.mediumUrl) return item.mediumUrl;
+  if (size === 'original' && item.originalUrl) return item.originalUrl;
+  return item.image || item.thumbnailUrl || item.mediumUrl || item.originalUrl || '';
+};
+
+/**
  * Get cached image URL (async)
  * Fetches and caches the image if not already cached
  * @param {string} imagePath - Relative or absolute image path

@@ -4,11 +4,11 @@ import { FiShoppingCart, FiStar, FiMessageCircle } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import getImageUrl, { handleImageError } from '../utils/imageUrl';
+import getImageUrl, { getImagePathBySize } from '../utils/imageUrl';
 import formatCurrency from '../utils/formatCurrency';
 import { updateMetaTags } from '../utils/metaTags';
 import { toast } from 'react-toastify';
-import CachedImage from '../components/CachedImage';
+import OptimizedImage from '../components/OptimizedImage';
 import './ProductDetail.css';
 
 const ProductDetail = () => {
@@ -37,7 +37,7 @@ const ProductDetail = () => {
       updateMetaTags({
         title: p.name,
         description: desc || `${p.name} at iDream Mall`,
-        image: getImageUrl(p.image) || '/logo.svg',
+        image: getImageUrl(getImagePathBySize(p, 'original') || p.image) || '/logo.svg',
         url: window.location.href,
         type: 'product',
         priceAmount: p.price,
@@ -127,8 +127,9 @@ const ProductDetail = () => {
       <div className="product-detail-container">
         <div className="product-main">
           <div className="product-image-section">
-            <CachedImage
-              src={product.image}
+            <OptimizedImage
+              item={product}
+              size="medium"
               alt={product.name}
             />
           </div>
