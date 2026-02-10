@@ -41,6 +41,9 @@ const shopSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  thumbnailUrl: { type: String, default: '' },
+  mediumUrl: { type: String, default: '' },
+  originalUrl: { type: String, default: '' },
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Category',
@@ -100,8 +103,8 @@ shopSchema.pre('save', async function() {
   }
 });
 
-// Index for sorting by priority
 shopSchema.index({ priority: -1, createdAt: -1 });
+shopSchema.index({ category: 1, isActive: 1 });
 
 module.exports = mongoose.model('Shop', shopSchema);
 

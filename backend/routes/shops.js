@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const shopController = require('../controllers/shopController');
 const { auth, optionalAuth, authorize, checkPermission } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { imageUpload } = require('../middleware/upload');
 
 /**
  * @swagger
@@ -158,7 +158,7 @@ router.get('/', optionalAuth, shopController.getAllShops);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post('/', auth, checkPermission('shop', 'create'), upload.single('shopImage'), shopController.createShop);
+router.post('/', auth, checkPermission('shop', 'create'), imageUpload.single('shopImage'), shopController.createShop);
 
 /**
  * @swagger
@@ -213,7 +213,7 @@ router.post('/', auth, checkPermission('shop', 'create'), upload.single('shopIma
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/:id', auth, checkPermission('shop', 'update'), upload.single('shopImage'), shopController.updateShop);
+router.put('/:id', auth, checkPermission('shop', 'update'), imageUpload.single('shopImage'), shopController.updateShop);
 
 /**
  * @swagger

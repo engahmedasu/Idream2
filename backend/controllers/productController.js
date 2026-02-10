@@ -5,6 +5,7 @@ const Review = require('../models/Review');
 const ShopSubscription = require('../models/ShopSubscription');
 const SubscriptionPlanLimit = require('../models/SubscriptionPlanLimit');
 const mongoose = require('mongoose');
+const { processImage } = require('../services/mediaProcessor');
 
 // Helper to attach averageRating and totalReviews to product documents
 exports.attachRatingsToProducts = async (products) => {
@@ -72,10 +73,13 @@ exports.attachRatingsToProducts = async (products) => {
   return productsWithRatings;
 };
 
-// Get all products
+// Get all products (lean, select, pagination; listing returns thumbnailUrl for images)
 exports.getAllProducts = async (req, res) => {
   try {
-    const { shop, category, isHotOffer, isActive, search, sortBy = 'priority' } = req.query;
+    const { shop, category, isHotOffer, isActive, search, sortBy = 'priority', page, limit } = req.query;
+    const pageNum = Math.max(1, parseInt(page, 10) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10) || 20));
+    const skip = (pageNum - 1) * limitNum;
     const filter = {};
 
     // If user is shopAdmin, restrict to their shop only
@@ -129,17 +133,32 @@ exports.getAllProducts = async (req, res) => {
       sort = { createdAt: -1 };
     }
 
-    let products = await Product.find(filter)
-      .populate('shop', 'name image')
+    const usePagination = page !== undefined || limit !== undefined;
+    const query = Product.find(filter)
+      .select('name description price shop category isHotOffer priority thumbnailUrl mediumUrl originalUrl image averageRating totalReviews isActive createdAt')
+      .populate('shop', 'name image thumbnailUrl')
       .populate('category', 'name')
       .populate('createdBy', 'email')
       .populate('updatedBy', 'email')
       .populate('approvedBy', 'email')
-      .sort(sort);
+      .sort(sort)
+      .lean();
+    if (usePagination) {
+      query.skip(skip).limit(limitNum);
+    }
+    const [products, total] = usePagination
+      ? await Promise.all([query, Product.countDocuments(filter)])
+      : [await query, null];
 
-    products = await exports.attachRatingsToProducts(products);
-
-    res.json(products);
+    const productsWithRatings = await exports.attachRatingsToProducts(products);
+    if (usePagination) {
+      res.json({
+        data: productsWithRatings,
+        pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) },
+      });
+    } else {
+      res.json(productsWithRatings);
+    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -149,10 +168,12 @@ exports.getAllProducts = async (req, res) => {
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
+      .select('name description price shop category isHotOffer priority thumbnailUrl mediumUrl originalUrl image shippingTitle shippingDescription shippingFees warrantyTitle warrantyDescription averageRating totalReviews productType isActive createdAt')
       .populate('shop')
       .populate('category')
       .populate('createdBy', 'email')
-      .populate('updatedBy', 'email');
+      .populate('updatedBy', 'email')
+      .lean();
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
@@ -214,13 +235,14 @@ exports.getHotOffers = async (req, res) => {
     if (category) filter.category = category;
 
     let products = await Product.find(filter)
-      .populate('shop', 'name image')
+      .select('name description price shop category isHotOffer priority thumbnailUrl image averageRating totalReviews')
+      .populate('shop', 'name image thumbnailUrl')
       .populate('category', 'name')
       .sort({ priority: -1, createdAt: -1 })
-      .limit(parseInt(limit));
+      .limit(parseInt(limit, 10) || 20)
+      .lean();
 
     products = await exports.attachRatingsToProducts(products);
-
     res.json(products);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -232,7 +254,7 @@ exports.createProduct = async (req, res) => {
   try {
     const productData = {
       ...req.body,
-      image: req.file ? `/uploads/products/${req.file.filename}` : (req.body.image || ''),
+      image: req.file ? `/uploads/_temp/products/${req.file.filename}` : (req.body.image || ''),
       shop: req.body.shop || req.user.shop,
       createdBy: req.user._id
     };
@@ -387,9 +409,25 @@ exports.createProduct = async (req, res) => {
       }
     }
 
-    const product = await Product.create(productData);
-    await product.populate('shop category');
-
+    let product = await Product.create(productData);
+    if (req.file && req.file.path) {
+      try {
+        const urls = await processImage(req.file.path, 'product', product._id);
+        await Product.findByIdAndUpdate(product._id, {
+          thumbnailUrl: urls.thumbnailUrl,
+          mediumUrl: urls.mediumUrl,
+          originalUrl: urls.originalUrl,
+          image: urls.originalUrl
+        });
+        product = await Product.findById(product._id).populate('shop category');
+      } catch (imgErr) {
+        console.error('Image processing failed:', imgErr);
+        await Product.findByIdAndDelete(product._id);
+        return res.status(500).json({ message: 'Image processing failed. Please try another image.' });
+      }
+    } else {
+      await product.populate('shop category');
+    }
     res.status(201).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -533,8 +571,17 @@ exports.updateProduct = async (req, res) => {
       }
     }
 
-    if (req.file) {
-      updateData.image = `/uploads/products/${req.file.filename}`;
+    if (req.file && req.file.path) {
+      try {
+        const urls = await processImage(req.file.path, 'product', req.params.id);
+        updateData.thumbnailUrl = urls.thumbnailUrl;
+        updateData.mediumUrl = urls.mediumUrl;
+        updateData.originalUrl = urls.originalUrl;
+        updateData.image = urls.originalUrl;
+      } catch (imgErr) {
+        console.error('Image processing failed:', imgErr);
+        return res.status(500).json({ message: 'Image processing failed. Please try another image.' });
+      }
     }
 
     // Get the product to check shop and current hot offer status

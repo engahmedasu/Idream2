@@ -12,8 +12,11 @@ const productSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    required: true
+    default: ''
   },
+  thumbnailUrl: { type: String, default: '' },
+  mediumUrl: { type: String, default: '' },
+  originalUrl: { type: String, default: '' },
   price: {
     type: Number,
     required: true,
@@ -106,8 +109,9 @@ const productSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for sorting by priority
 productSchema.index({ priority: -1, createdAt: -1 });
+productSchema.index({ shop: 1, isActive: 1 });
+productSchema.index({ category: 1, isActive: 1 });
 
 module.exports = mongoose.model('Product', productSchema);
 
