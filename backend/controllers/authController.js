@@ -63,26 +63,18 @@ exports.register = async (req, res) => {
       return res.status(500).json({ message: 'Guest role is not active' });
     }
 
-    // Create user with guest role
+    // Create user with guest role - default active and email verified (no OTP step)
     const user = await User.create({
       email,
       phone,
       password,
       role: guestRole._id,
-      isEmailVerified: false,
+      isEmailVerified: true,
       isActive: true
     });
 
-    // Generate and send OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    user.emailVerificationOTP = otp;
-    user.emailVerificationOTPExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
-    await user.save();
-
-    await sendOTPEmail(email, otp);
-
     res.status(201).json({
-      message: 'Registration successful. Please verify your email.',
+      message: 'Registration successful.',
       userId: user._id
     });
   } catch (error) {

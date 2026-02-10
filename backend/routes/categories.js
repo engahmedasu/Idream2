@@ -26,14 +26,14 @@ const upload = require('../middleware/upload');
  *               items:
  *                 type: object
  */
-// Public endpoint - allow unauthenticated users, superAdmin, mallAdmin, Sales, and shopAdmin
+// Public endpoint - allow unauthenticated users, guest, superAdmin, mallAdmin, Sales, and shopAdmin
 router.get('/', optionalAuth, (req, res, next) => {
-  // If user is authenticated, allow superAdmin, mallAdmin, Sales, and shopAdmin
+  // If user is authenticated, allow guest, superAdmin, mallAdmin, Sales, and shopAdmin
   if (req.user) {
     const userRole = req.user.role?.name;
-    const allowedRoles = ['superAdmin', 'mallAdmin', 'Sales', 'shopAdmin'];
+    const allowedRoles = ['guest', 'superAdmin', 'mallAdmin', 'Sales', 'shopAdmin'];
     if (!allowedRoles.includes(userRole)) {
-      return res.status(403).json({ message: 'Access denied. Categories are only available to unauthenticated users, superAdmin, mallAdmin, Sales, or shopAdmin.' });
+      return res.status(403).json({ message: 'Access denied. Categories are only available to unauthenticated users, guest, superAdmin, mallAdmin, Sales, or shopAdmin.' });
     }
   }
   next();
@@ -57,14 +57,14 @@ router.get('/', optionalAuth, (req, res, next) => {
  *       404:
  *         description: Category not found
  */
-// Public endpoint - allow unauthenticated users, superAdmin, mallAdmin, Sales, and shopAdmin
+// Public endpoint - allow unauthenticated users, guest, superAdmin, mallAdmin, Sales, and shopAdmin
 router.get('/:id', optionalAuth, (req, res, next) => {
-  // If user is authenticated, allow superAdmin, mallAdmin, Sales, and shopAdmin
+  // If user is authenticated, allow guest, superAdmin, mallAdmin, Sales, and shopAdmin
   if (req.user) {
     const userRole = req.user.role?.name;
-    const allowedRoles = ['superAdmin', 'mallAdmin', 'Sales', 'shopAdmin'];
+    const allowedRoles = ['guest', 'superAdmin', 'mallAdmin', 'Sales', 'shopAdmin'];
     if (!allowedRoles.includes(userRole)) {
-      return res.status(403).json({ message: 'Access denied. Categories are only available to unauthenticated users, superAdmin, mallAdmin, Sales, or shopAdmin.' });
+      return res.status(403).json({ message: 'Access denied. Categories are only available to unauthenticated users, guest, superAdmin, mallAdmin, Sales, or shopAdmin.' });
     }
   }
   next();

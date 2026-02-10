@@ -34,8 +34,8 @@ const Register = () => {
 
     try {
       await register(formData.email, formData.phone, formData.password);
-      toast.success(t('common.success'));
-      navigate('/verify-otp', { state: { email: formData.email } });
+      toast.success(t('auth.registrationSuccess') || 'Registration successful. You can sign in.');
+      navigate('/login');
     } catch (error) {
       toast.error(error.response?.data?.message || t('common.error'));
     } finally {

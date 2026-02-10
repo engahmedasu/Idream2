@@ -10,6 +10,7 @@ const VideoBanner = ({ categoryId = null }) => {
   const [loading, setLoading] = useState(true);
   const [videoSource, setVideoSource] = useState(null);
   const [thumbnailUrl, setThumbnailUrl] = useState(null);
+  const [isMuted, setIsMuted] = useState(true); // Muted by default; user can unmute
   const videoRef = useRef(null);
   const iframeRef = useRef(null);
 
@@ -85,9 +86,8 @@ const VideoBanner = ({ categoryId = null }) => {
       }
       
       if (videoId) {
-        // Don't use loop parameter - we want sequential playback, not looping individual videos
-        // mute=0 allows sound during autoplay (browsers may still block until user interaction)
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&rel=0&controls=0&modestbranding=1&disablekb=1&playsinline=1`;
+        // Mute by default; enablejsapi=1 allows postMessage to unmute on user click
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&controls=0&modestbranding=1&disablekb=1&playsinline=1&enablejsapi=1`;
       }
       return video.videoUrl;
     }
@@ -185,6 +185,25 @@ const VideoBanner = ({ categoryId = null }) => {
 
   const currentVideo = videos[currentIndex];
 
+  // Reset muted state when switching videos
+  useEffect(() => {
+    setIsMuted(true);
+  }, [currentIndex]);
+
+  const handleMuteToggle = useCallback(() => {
+    const isYouTubeVideo = videoSource?.includes('youtube.com/embed');
+    if (isYouTubeVideo && iframeRef.current?.contentWindow) {
+      const cmd = isMuted ? 'unMute' : 'mute';
+      iframeRef.current.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func: cmd, args: '' }),
+        'https://www.youtube.com'
+      );
+    } else if (videoRef.current) {
+      videoRef.current.muted = !isMuted; // Toggle: new muted state is opposite of current
+    }
+    setIsMuted(prev => !prev);
+  }, [isMuted, videoSource]);
+
   // Load cached video source and thumbnail when video changes
   useEffect(() => {
     if (!currentVideo) {
@@ -223,6 +242,21 @@ const VideoBanner = ({ categoryId = null }) => {
       <div className="video-banner-slide">
         {videoSource ? (
           <div className="video-container">
+            {(isYouTube || !isVimeo) && (
+              <button
+                type="button"
+                className="video-mute-toggle"
+                onClick={handleMuteToggle}
+                aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                title={isMuted ? 'Click to unmute' : 'Mute'}
+              >
+                {isMuted ? (
+                  <span className="mute-icon" aria-hidden>🔇</span>
+                ) : (
+                  <span className="mute-icon" aria-hidden>🔊</span>
+                )}
+              </button>
+            )}
             {isYouTube || isVimeo ? (
               <iframe
                 ref={iframeRef}
@@ -237,6 +271,7 @@ const VideoBanner = ({ categoryId = null }) => {
               <video
                 ref={videoRef}
                 autoPlay
+                muted
                 playsInline
                 onEnded={handleVideoEnd}
                 className="video-element"

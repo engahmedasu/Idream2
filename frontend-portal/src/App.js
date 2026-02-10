@@ -34,7 +34,7 @@ function AppContent() {
   return (
     <div className="App">
       {!isEnterprisePortal && <Header onCartClick={() => setCartOpen(true)} />}
-      <main style={{ minHeight: isEnterprisePortal ? '100vh' : 'calc(100vh - 200px)' }}>
+      <main style={isEnterprisePortal ? { minHeight: '100vh' } : undefined}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/category/:id" element={<CategoryPage />} />

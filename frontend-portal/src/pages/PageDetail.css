@@ -1,5 +1,5 @@
 .page-detail-container {
-  min-height: calc(100vh - 200px);
+  /* min-height: calc(100vh - 200px); */
   padding: 2rem;
   background: #f9fafb;
 }
