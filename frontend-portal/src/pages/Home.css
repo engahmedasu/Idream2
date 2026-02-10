@@ -1,6 +1,7 @@
 .home {
   position: relative;
-  /* min-height: calc(100vh - 200px); */
+  min-height: 100%;
+  background: url('../assets/images/background.jpeg') center center / cover no-repeat fixed;
 }
 
 .home::before {
